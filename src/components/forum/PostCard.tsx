@@ -2,7 +2,10 @@
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { MessageSquare, ThumbsUp } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface PostCardProps {
   post: {
@@ -23,6 +26,26 @@ interface PostCardProps {
 }
 
 export function PostCard({ post }: PostCardProps) {
+  const [upvotes, setUpvotes] = useState(post.upvoteCount);
+  const [hasUpvoted, setHasUpvoted] = useState(false);
+  const { toast } = useToast();
+
+  const handleUpvote = () => {
+    if (hasUpvoted) {
+      setUpvotes(prev => prev - 1);
+      setHasUpvoted(false);
+      toast({
+        description: "Upvote removed",
+      });
+    } else {
+      setUpvotes(prev => prev + 1);
+      setHasUpvoted(true);
+      toast({
+        description: "Post upvoted!",
+      });
+    }
+  };
+
   return (
     <article className="rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center gap-2">
@@ -71,14 +94,19 @@ export function PostCard({ post }: PostCardProps) {
           ))}
         </div>
         <div className="flex items-center gap-3 text-muted-foreground">
-          <span className="flex items-center gap-1 text-sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`flex items-center gap-1 ${hasUpvoted ? 'text-primary' : ''}`}
+            onClick={handleUpvote}
+          >
             <ThumbsUp className="h-4 w-4" />
-            {post.upvoteCount}
-          </span>
-          <span className="flex items-center gap-1 text-sm">
+            {upvotes}
+          </Button>
+          <Link to={`/post/${post.id}`} className="flex items-center gap-1 text-sm">
             <MessageSquare className="h-4 w-4" />
             {post.commentCount}
-          </span>
+          </Link>
         </div>
       </div>
     </article>

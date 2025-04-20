@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { TagList } from "@/components/forum/TagList";
@@ -9,22 +8,45 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { MessageSquare, ThumbsUp, ThumbsDown, Eye, Clock, ArrowUp } from "lucide-react";
+import { useState } from "react";
+import { CommentForm } from "@/components/forum/CommentForm";
+import { useToast } from "@/hooks/use-toast";
 
 export default function PostPage() {
   const { postId } = useParams<{ postId: string }>();
+  const [upvotes, setUpvotes] = useState(0);
+  const [hasUpvoted, setHasUpvoted] = useState(false);
+  const { toast } = useToast();
   
-  // Find the current post
   const post = mockPosts.find(p => p.id === postId);
-  
-  // Get related posts based on tags
   const relatedPosts = post 
     ? mockPosts
         .filter(p => p.id !== postId && p.tags.some(tag => post.tags.includes(tag)))
         .slice(0, 3)
     : [];
   
-  // Get popular tags for sidebar
   const popularTags = mockTags.slice(0, 10);
+
+  const handleUpvote = () => {
+    if (hasUpvoted) {
+      setUpvotes(prev => prev - 1);
+      setHasUpvoted(false);
+      toast({
+        description: "Upvote removed",
+      });
+    } else {
+      setUpvotes(prev => prev + 1);
+      setHasUpvoted(true);
+      toast({
+        description: "Post upvoted!",
+      });
+    }
+  };
+
+  const handleComment = (content: string) => {
+    // In a real app, this would send the comment to an API
+    console.log("New comment:", content);
+  };
 
   if (!post) {
     return (
@@ -94,10 +116,14 @@ export default function PostPage() {
                 <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t">
                   <div className="flex items-center gap-6">
                     <div className="flex items-center gap-1">
-                      <Button variant="outline" size="icon">
+                      <Button
+                        variant={hasUpvoted ? "default" : "outline"}
+                        size="icon"
+                        onClick={handleUpvote}
+                      >
                         <ThumbsUp className="h-4 w-4" />
                       </Button>
-                      <span className="mx-1">{post.upvoteCount}</span>
+                      <span className="mx-1">{post.upvoteCount + upvotes}</span>
                       <Button variant="outline" size="icon">
                         <ThumbsDown className="h-4 w-4" />
                       </Button>
@@ -122,8 +148,10 @@ export default function PostPage() {
             </Card>
             
             <div>
-              <h2 className="text-xl font-medium mb-4">Comments ({post.commentCount})</h2>
-              <div className="space-y-4">
+              <h2 className="text-xl font-medium mb-4">Leave a comment</h2>
+              <CommentForm onSubmit={handleComment} />
+              
+              <div className="mt-6 space-y-4">
                 <Card>
                   <CardContent className="pt-6">
                     <div className="flex gap-3">
@@ -175,15 +203,6 @@ export default function PostPage() {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-              
-              <div className="mt-6">
-                <h3 className="text-lg font-medium mb-2">Leave a comment</h3>
-                <textarea
-                  className="w-full border rounded-md p-2 h-24 focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Write your comment..."
-                ></textarea>
-                <Button className="mt-2">Submit</Button>
               </div>
             </div>
           </div>
