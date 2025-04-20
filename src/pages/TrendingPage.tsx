@@ -9,7 +9,7 @@ import { MessageSquare, ThumbsUp, Eye, Clock } from "lucide-react";
 // Mock trending posts data
 const trendingPosts = [
   {
-    id: 1,
+    id: "1",
     title: "How to optimize React performance in large applications",
     content: "I'm working on a large React application and notice significant slowdowns...",
     author: "devmaster",
@@ -21,7 +21,7 @@ const trendingPosts = [
     tags: ["react", "performance", "optimization"]
   },
   {
-    id: 2,
+    id: "2",
     title: "Comparing TypeScript with Flow for type checking",
     content: "I've been using Flow for a while but considering TypeScript...",
     author: "typescript_fan",
@@ -33,7 +33,7 @@ const trendingPosts = [
     tags: ["typescript", "flow", "types"]
   },
   {
-    id: 3,
+    id: "3",
     title: "Implementing WebSockets with Node.js and React",
     content: "I need to build a real-time application with WebSockets...",
     author: "socketmaster",
@@ -45,7 +45,7 @@ const trendingPosts = [
     tags: ["websockets", "node.js", "react"]
   },
   {
-    id: 4,
+    id: "4",
     title: "Best practices for API design in 2024",
     content: "What are the current best practices for designing RESTful APIs...",
     author: "api_designer",
@@ -57,7 +57,7 @@ const trendingPosts = [
     tags: ["api", "rest", "design-patterns"]
   },
   {
-    id: 5,
+    id: "5",
     title: "Docker vs Kubernetes for small projects",
     content: "Is Kubernetes overkill for small to medium sized projects?...",
     author: "container_enthusiast",
@@ -100,7 +100,7 @@ export default function TrendingPage() {
                 <Card key={post.id}>
                   <CardHeader>
                     <CardTitle>
-                      <Link to={`/posts/${post.id}`} className="hover:text-primary">
+                      <Link to={`/post/${post.id}`} className="hover:text-primary">
                         {post.title}
                       </Link>
                     </CardTitle>
@@ -140,7 +140,7 @@ export default function TrendingPage() {
                       </span>
                     </div>
                     <Button variant="ghost" size="sm" asChild>
-                      <Link to={`/posts/${post.id}`}>Read more</Link>
+                      <Link to={`/post/${post.id}`}>Read more</Link>
                     </Button>
                   </CardFooter>
                 </Card>
