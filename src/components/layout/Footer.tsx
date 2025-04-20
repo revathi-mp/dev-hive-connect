@@ -20,7 +20,7 @@ export function Footer() {
           <Link to="/terms" className="hover:underline">
             Terms
           </Link>
-          <a href="https://github.com" className="hover:underline flex items-center gap-1">
+          <a href="https://github.com/devhive-community" target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
             <Github className="h-4 w-4" />
             GitHub
           </a>
