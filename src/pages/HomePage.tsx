@@ -1,11 +1,14 @@
 
+import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PostCard } from "@/components/forum/PostCard";
 import { CategoryCard } from "@/components/forum/CategoryCard";
 import { TagList } from "@/components/forum/TagList";
 import { mockPosts, mockCategories, mockTags } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
-import { Plus, Code, FileCode, Settings, BookOpen, Bell, Users } from "lucide-react";
+import { Plus, Code, FileCode, Settings, BookOpen, Bell, Users, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { NewPostModal } from "@/components/forum/NewPostModal";
 
 const iconMap = {
   "Code": Code,
@@ -17,11 +20,28 @@ const iconMap = {
 };
 
 export default function HomePage() {
+  // New state for modal and searching
+  const [modalOpen, setModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [posts, setPosts] = useState(mockPosts);
+
   // Map string icon names to actual icon components
   const categoriesWithIcons = mockCategories.map(category => ({
     ...category,
     icon: iconMap[category.icon as keyof typeof iconMap]
   }));
+
+  // Filter posts by title/content based on search query
+  const filteredPosts = posts.filter(post =>
+    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    post.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Handler for new post submit (add new post to top)
+  const handleNewPost = (newPost) => {
+    setPosts([{...newPost, id: Date.now().toString()}, ...posts]);
+    setModalOpen(false);
+  };
 
   return (
     <MainLayout>
@@ -33,12 +53,22 @@ export default function HomePage() {
               Where developers collaborate, share knowledge, and grow together
             </p>
           </div>
-          <Button className="md:w-auto" size="lg">
+          <Button className="md:w-auto" size="lg" onClick={() => setModalOpen(true)}>
             <Plus className="mr-1 h-4 w-4" />
             New Post
           </Button>
         </div>
-
+        {/* Search input for discussions */}
+        <div className="mb-8 flex w-full max-w-md items-center relative">
+          <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            className="pl-9"
+            placeholder="Search discussions..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+        </div>
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <section className="mb-10">
@@ -49,13 +79,18 @@ export default function HomePage() {
                 </Button>
               </div>
               <div className="space-y-4">
-                {mockPosts.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
+                {filteredPosts.length > 0 ? (
+                  filteredPosts.map((post) => (
+                    <PostCard key={post.id} post={post} />
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-muted-foreground border rounded-md">
+                    No discussions found.
+                  </div>
+                )}
               </div>
             </section>
           </div>
-
           <div className="space-y-6">
             <section>
               <h2 className="mb-4 text-xl font-semibold">Categories</h2>
@@ -68,7 +103,6 @@ export default function HomePage() {
                 </Button>
               </div>
             </section>
-
             <section>
               <TagList tags={mockTags.slice(0, 9)} />
               <Button variant="outline" className="mt-3 w-full justify-center" size="sm">
@@ -78,6 +112,7 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+      <NewPostModal open={modalOpen} onOpenChange={setModalOpen} onSubmit={handleNewPost} />
     </MainLayout>
   );
 }
