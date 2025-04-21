@@ -31,15 +31,31 @@ export default function HomePage() {
     icon: iconMap[category.icon as keyof typeof iconMap]
   }));
 
-  // Filter posts by title/content based on search query
+  // Filter posts by title/excerpt based on search query
   const filteredPosts = posts.filter(post =>
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.content.toLowerCase().includes(searchQuery.toLowerCase())
+    post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Handler for new post submit (add new post to top)
   const handleNewPost = (newPost) => {
-    setPosts([{...newPost, id: Date.now().toString()}, ...posts]);
+    // Create a complete post object with all required fields
+    const completePost = {
+      ...newPost,
+      id: Date.now().toString(),
+      excerpt: newPost.content.substring(0, 120) + (newPost.content.length > 120 ? "..." : ""),
+      author: {
+        name: "Current User", // For demo purposes
+        avatar: "https://i.pravatar.cc/100?img=7" 
+      },
+      category: "General",
+      tags: ["general"],
+      commentCount: 0,
+      upvoteCount: 0,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+    
+    setPosts([completePost, ...posts]);
     setModalOpen(false);
   };
 
