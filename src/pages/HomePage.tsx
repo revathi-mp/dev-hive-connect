@@ -62,11 +62,18 @@ export default function HomePage() {
     
     setPosts([completePost, ...posts]);
     setModalOpen(false);
+    // Clear the search when adding a new post to ensure it's visible
+    setSearchQuery("");
   };
 
   // Handle view all posts
   const handleViewAllPosts = () => {
     setViewAllPosts(true);
+  };
+
+  // Handle view less posts (show only 3)
+  const handleViewLessPosts = () => {
+    setViewAllPosts(false);
   };
 
   return (
@@ -100,9 +107,15 @@ export default function HomePage() {
             <section className="mb-10">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Latest Discussions</h2>
-                <Button variant="outline" size="sm" onClick={handleViewAllPosts}>
-                  View All
-                </Button>
+                {viewAllPosts ? (
+                  <Button variant="outline" size="sm" onClick={handleViewLessPosts}>
+                    View Less
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" onClick={handleViewAllPosts}>
+                    View All
+                  </Button>
+                )}
               </div>
               <div className="space-y-4">
                 {postsToDisplay.length > 0 ? (
@@ -113,6 +126,16 @@ export default function HomePage() {
                   <div className="p-8 text-center text-muted-foreground border rounded-md">
                     No discussions found.
                   </div>
+                )}
+                {!viewAllPosts && filteredPosts.length > 3 && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full mt-2" 
+                    onClick={handleViewAllPosts}
+                  >
+                    Show {filteredPosts.length - 3} more discussions
+                  </Button>
                 )}
               </div>
             </section>
@@ -128,7 +151,6 @@ export default function HomePage() {
                   variant="outline" 
                   className="w-full justify-center" 
                   size="sm"
-                  onClick={() => window.location.href = '/tags'}
                   asChild
                 >
                   <Link to="/tags">View All Categories</Link>
