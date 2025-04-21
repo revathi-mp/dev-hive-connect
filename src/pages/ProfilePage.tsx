@@ -1,9 +1,23 @@
-
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Edit, Github } from "lucide-react";
+import { Badge as UIBadge } from "@/components/ui/badge";
+import { Edit, Github, Medal, Trophy, Star } from "lucide-react";
+
+// Helper to get badges based on reputation score
+function getBadges(reputation: number) {
+  const badges = [];
+  if (reputation >= 1000) {
+    badges.push({ label: "Trophy", icon: Trophy, color: "text-yellow-500", desc: "Legend (1000+ Rep!)" });
+  }
+  if (reputation >= 500) {
+    badges.push({ label: "Star", icon: Star, color: "text-blue-500", desc: "Pro (500+ Rep)" });
+  }
+  if (reputation >= 100) {
+    badges.push({ label: "Medal", icon: Medal, color: "text-purple-500", desc: "Rising Star (100+ Rep)" });
+  }
+  return badges;
+}
 
 export default function ProfilePage() {
   // Mock user data
@@ -15,9 +29,11 @@ export default function ProfilePage() {
     joinDate: "April 2023",
     posts: 24,
     comments: 132,
-    reputation: 754,
+    reputation: 754, // change to test badge assignment
     skills: ["React", "TypeScript", "Next.js", "TailwindCSS", "Node.js"]
   };
+
+  const repBadges = getBadges(user.reputation);
 
   return (
     <MainLayout>
@@ -33,7 +49,24 @@ export default function ProfilePage() {
                 </Avatar>
                 <h1 className="mt-4 text-2xl font-bold">{user.name}</h1>
                 <p className="text-sm text-muted-foreground">@{user.username}</p>
-                <p className="mt-4">{user.bio}</p>
+                {/* Reputation Score & Badges */}
+                <div className="mt-4 flex flex-col items-center gap-1 w-full">
+                  <span className="inline-block text-lg font-bold text-primary">
+                    Reputation: {user.reputation}
+                  </span>
+                  <div className="flex flex-wrap gap-2 items-center justify-center mt-1">
+                    {repBadges.length === 0 ? (
+                      <span className="text-xs text-muted-foreground">No badges yet</span>
+                    ) : (
+                      repBadges.map(badge => (
+                        <UIBadge key={badge.label} className={`gap-1 px-2 py-1 ${badge.color}`} variant="secondary" title={badge.desc}>
+                          <badge.icon className="h-4 w-4" />
+                          <span className="hidden sm:inline">{badge.label}</span>
+                        </UIBadge>
+                      ))
+                    )}
+                  </div>
+                </div>
                 <div className="mt-6 w-full">
                   <Button className="w-full">
                     <Edit className="mr-2 h-4 w-4" />
@@ -57,9 +90,18 @@ export default function ProfilePage() {
                     <span className="text-muted-foreground">Comments</span>
                     <span>{user.comments}</span>
                   </div>
+                  {/* Reputation already displayed above, but add special features if eligible: */}
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Reputation</span>
-                    <span className="font-medium text-primary">{user.reputation}</span>
+                    <span className="text-muted-foreground">Special Features</span>
+                    <span>
+                      {user.reputation >= 1000
+                        ? "🎉 All Access"
+                        : user.reputation >= 500
+                        ? "⭐ Post Highlighting"
+                        : user.reputation >= 100
+                        ? "🌟 Profile Customization"
+                        : "None"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -68,9 +110,9 @@ export default function ProfilePage() {
                 <h3 className="mb-2 font-medium">Skills & Technologies</h3>
                 <div className="flex flex-wrap gap-2">
                   {user.skills.map((skill) => (
-                    <Badge key={skill} variant="secondary">
+                    <UIBadge key={skill} variant="secondary">
                       {skill}
-                    </Badge>
+                    </UIBadge>
                   ))}
                 </div>
               </div>
