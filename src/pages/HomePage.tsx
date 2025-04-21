@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PostCard } from "@/components/forum/PostCard";
 import { CategoryCard } from "@/components/forum/CategoryCard";
@@ -24,6 +25,7 @@ export default function HomePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [posts, setPosts] = useState(mockPosts);
+  const [viewAllPosts, setViewAllPosts] = useState(false);
 
   // Map string icon names to actual icon components
   const categoriesWithIcons = mockCategories.map(category => ({
@@ -36,6 +38,9 @@ export default function HomePage() {
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Show all posts or limit to 3 based on viewAllPosts state
+  const postsToDisplay = viewAllPosts ? filteredPosts : filteredPosts.slice(0, 3);
 
   // Handler for new post submit (add new post to top)
   const handleNewPost = (newPost) => {
@@ -57,6 +62,11 @@ export default function HomePage() {
     
     setPosts([completePost, ...posts]);
     setModalOpen(false);
+  };
+
+  // Handle view all posts
+  const handleViewAllPosts = () => {
+    setViewAllPosts(true);
   };
 
   return (
@@ -90,13 +100,13 @@ export default function HomePage() {
             <section className="mb-10">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Latest Discussions</h2>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleViewAllPosts}>
                   View All
                 </Button>
               </div>
               <div className="space-y-4">
-                {filteredPosts.length > 0 ? (
-                  filteredPosts.map((post) => (
+                {postsToDisplay.length > 0 ? (
+                  postsToDisplay.map((post) => (
                     <PostCard key={post.id} post={post} />
                   ))
                 ) : (
@@ -114,15 +124,26 @@ export default function HomePage() {
                 {categoriesWithIcons.slice(0, 4).map((category) => (
                   <CategoryCard key={category.slug} category={category} />
                 ))}
-                <Button variant="outline" className="w-full justify-center" size="sm">
-                  View All Categories
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-center" 
+                  size="sm"
+                  onClick={() => window.location.href = '/tags'}
+                  asChild
+                >
+                  <Link to="/tags">View All Categories</Link>
                 </Button>
               </div>
             </section>
             <section>
               <TagList tags={mockTags.slice(0, 9)} />
-              <Button variant="outline" className="mt-3 w-full justify-center" size="sm">
-                View All Tags
+              <Button 
+                variant="outline" 
+                className="mt-3 w-full justify-center" 
+                size="sm"
+                asChild
+              >
+                <Link to="/tags">View All Tags</Link>
               </Button>
             </section>
           </div>
