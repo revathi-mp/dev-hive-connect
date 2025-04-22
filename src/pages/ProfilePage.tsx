@@ -1,8 +1,12 @@
+
+import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Badge as UIBadge } from "@/components/ui/badge";
-import { Edit, Github, Medal, Trophy, Star } from "lucide-react";
+import { Medal, Trophy, Star } from "lucide-react";
+import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
+import { GitHubConnect } from "@/components/profile/GitHubConnect";
+import { RecentActivity } from "@/components/profile/RecentActivity";
 
 // Helper to get badges based on reputation score
 function getBadges(reputation: number) {
@@ -20,8 +24,7 @@ function getBadges(reputation: number) {
 }
 
 export default function ProfilePage() {
-  // Mock user data
-  const user = {
+  const [user, setUser] = useState({
     name: "Sarah Johnson",
     username: "sarahjohnson",
     avatar: "https://i.pravatar.cc/300?img=1",
@@ -29,11 +32,15 @@ export default function ProfilePage() {
     joinDate: "April 2023",
     posts: 24,
     comments: 132,
-    reputation: 754, // change to test badge assignment
+    reputation: 754,
     skills: ["React", "TypeScript", "Next.js", "TailwindCSS", "Node.js"]
-  };
+  });
 
   const repBadges = getBadges(user.reputation);
+
+  const handleProfileUpdate = (updatedData: any) => {
+    setUser(prev => ({ ...prev, ...updatedData }));
+  };
 
   return (
     <MainLayout>
@@ -49,6 +56,8 @@ export default function ProfilePage() {
                 </Avatar>
                 <h1 className="mt-4 text-2xl font-bold">{user.name}</h1>
                 <p className="text-sm text-muted-foreground">@{user.username}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{user.bio}</p>
+
                 {/* Reputation Score & Badges */}
                 <div className="mt-4 flex flex-col items-center gap-1 w-full">
                   <span className="inline-block text-lg font-bold text-primary">
@@ -59,7 +68,12 @@ export default function ProfilePage() {
                       <span className="text-xs text-muted-foreground">No badges yet</span>
                     ) : (
                       repBadges.map(badge => (
-                        <UIBadge key={badge.label} className={`gap-1 px-2 py-1 ${badge.color}`} variant="secondary" title={badge.desc}>
+                        <UIBadge 
+                          key={badge.label} 
+                          className={`gap-1 px-2 py-1 ${badge.color}`} 
+                          variant="secondary" 
+                          title={badge.desc}
+                        >
                           <badge.icon className="h-4 w-4" />
                           <span className="hidden sm:inline">{badge.label}</span>
                         </UIBadge>
@@ -67,11 +81,9 @@ export default function ProfilePage() {
                     )}
                   </div>
                 </div>
+
                 <div className="mt-6 w-full">
-                  <Button className="w-full">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit Profile
-                  </Button>
+                  <EditProfileDialog user={user} onUpdate={handleProfileUpdate} />
                 </div>
               </div>
 
@@ -90,7 +102,6 @@ export default function ProfilePage() {
                     <span className="text-muted-foreground">Comments</span>
                     <span>{user.comments}</span>
                   </div>
-                  {/* Reputation already displayed above, but add special features if eligible: */}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Special Features</span>
                     <span>
@@ -119,22 +130,14 @@ export default function ProfilePage() {
 
               <div className="mt-6 border-t pt-6">
                 <h3 className="mb-2 font-medium">Connect</h3>
-                <Button variant="outline" className="w-full">
-                  <Github className="mr-2 h-4 w-4" />
-                  Connect GitHub
-                </Button>
+                <GitHubConnect />
               </div>
             </div>
           </div>
 
           {/* User Activity */}
           <div className="md:w-2/3">
-            <div className="rounded-lg border bg-card p-6 shadow-sm">
-              <h2 className="text-xl font-semibold">Recent Activity</h2>
-              <div className="mt-4 space-y-4">
-                <p className="text-muted-foreground">No recent activity to show.</p>
-              </div>
-            </div>
+            <RecentActivity />
           </div>
         </div>
       </div>
