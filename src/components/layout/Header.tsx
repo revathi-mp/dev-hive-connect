@@ -1,5 +1,6 @@
 
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
@@ -10,10 +11,53 @@ import {
   Search, 
   User,
   Moon,
-  Sun
+  Sun,
+  LogOut
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    document.documentElement.classList.toggle('dark');
+    toast({
+      title: `${newTheme === 'dark' ? 'Dark' : 'Light'} Mode Activated`,
+      description: `Switched to ${newTheme} mode.`,
+    });
+  };
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    toast({
+      title: "Logged In Successfully",
+      description: "Welcome back to DevHive Connect!",
+    });
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    toast({
+      title: "Logged Out",
+      description: "You have been logged out successfully.",
+    });
+    navigate("/");
+  };
+
+  const handleNotificationClick = () => {
+    setHasUnreadNotifications(false);
+    toast({
+      title: "Notifications",
+      description: "You have no new notifications.",
+    });
+  };
+
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
       <div className="container flex h-16 items-center justify-between">
@@ -38,35 +82,56 @@ export function Header() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleNotificationClick}
+            className="relative"
+          >
             <Bell className="h-5 w-5" />
+            {hasUnreadNotifications && (
+              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"></span>
+            )}
             <span className="sr-only">Notifications</span>
           </Button>
-          <Button variant="ghost" size="icon">
-            <Moon className="h-5 w-5" />
+          <Button variant="ghost" size="icon" onClick={toggleTheme}>
+            {theme === 'light' ? (
+              <Moon className="h-5 w-5" />
+            ) : (
+              <Sun className="h-5 w-5" />
+            )}
             <span className="sr-only">Toggle theme</span>
           </Button>
           <div className="hidden md:block">
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-1" asChild>
-                <Link to="/login">
-                  <LogIn className="h-4 w-4" />
-                  Login
-                </Link>
-              </Button>
-              <Button size="sm" className="gap-1" asChild>
-                <Link to="/signup">
-                  <User className="h-4 w-4" />
-                  Sign up
-                </Link>
-              </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/profile">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>SJ</AvatarFallback>
-                  </Avatar>
-                </Link>
-              </Button>
+              {isLoggedIn ? (
+                <>
+                  <Button variant="outline" size="sm" className="gap-1" onClick={handleLogout}>
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </Button>
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link to="/profile">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>SJ</AvatarFallback>
+                      </Avatar>
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" size="sm" className="gap-1" onClick={handleLogin}>
+                    <LogIn className="h-4 w-4" />
+                    Login
+                  </Button>
+                  <Button size="sm" className="gap-1" asChild>
+                    <Link to="/signup">
+                      <User className="h-4 w-4" />
+                      Sign up
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
