@@ -1,7 +1,6 @@
-
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Code } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -16,7 +15,7 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
         <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
           <div className="max-w-lg">
             <div className="mb-4 flex items-center gap-2 text-white">
-              <Code className="h-8 w-8" />
+              <Logo size="lg" className="text-white" />
               <span className="text-2xl font-bold">DevHive Connect</span>
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-white">
@@ -33,7 +32,7 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
         <div className="mx-auto w-full max-w-md">
           <div className="flex flex-col items-center space-y-2 text-center">
             <Link to="/" className="mb-4 flex items-center gap-2 lg:hidden">
-              <Code className="h-6 w-6 text-primary" />
+              <Logo size="md" />
               <span className="text-xl font-bold">DevHive Connect</span>
             </Link>
             <h2 className="text-3xl font-bold">{title}</h2>

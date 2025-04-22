@@ -1,11 +1,9 @@
-
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Logo } from "@/components/ui/Logo";
 import { 
   Bell, 
-  Code, 
   LogIn, 
   Menu, 
   Search, 
@@ -67,7 +65,7 @@ export function Header() {
             <span className="sr-only">Toggle menu</span>
           </Button>
           <Link to="/" className="flex items-center gap-2">
-            <Code className="h-6 w-6 text-primary" />
+            <Logo size="md" />
             <span className="text-xl font-bold tracking-tight">DevHive Connect</span>
           </Link>
         </div>
