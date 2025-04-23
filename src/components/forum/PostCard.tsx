@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +40,7 @@ export function PostCard({ post }: PostCardProps) {
     } else {
       if (hasDownvoted) {
         setHasDownvoted(false);
-        setUpvotes(prev => prev + 2); // +2 because we're removing a downvote and adding an upvote
+        setUpvotes(prev => prev + 2);
       } else {
         setUpvotes(prev => prev + 1);
       }
@@ -62,7 +61,7 @@ export function PostCard({ post }: PostCardProps) {
     } else {
       if (hasUpvoted) {
         setHasUpvoted(false);
-        setUpvotes(prev => prev - 2); // -2 because we're removing an upvote and adding a downvote
+        setUpvotes(prev => prev - 2);
       } else {
         setUpvotes(prev => prev - 1);
       }
@@ -76,12 +75,19 @@ export function PostCard({ post }: PostCardProps) {
   return (
     <article className="rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={post.author.avatar} alt={post.author.name} />
-          <AvatarFallback>{post.author.name[0]}</AvatarFallback>
-        </Avatar>
+        <Link to={`/user/${post.author.name.toLowerCase()}`} className="hover:opacity-80">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={post.author.avatar} alt={post.author.name} />
+            <AvatarFallback>{post.author.name[0]}</AvatarFallback>
+          </Avatar>
+        </Link>
         <div className="text-sm">
-          <span className="font-medium">{post.author.name}</span>
+          <Link 
+            to={`/user/${post.author.name.toLowerCase()}`}
+            className="font-medium hover:text-primary hover:underline"
+          >
+            {post.author.name}
+          </Link>
           <p className="text-xs text-muted-foreground">
             Posted in{" "}
             <Link
