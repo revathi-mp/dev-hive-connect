@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -10,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Code, FileCode, Settings, BookOpen, Bell, Users, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { NewPostModal } from "@/components/forum/NewPostModal";
+import { Logo } from "@/components/ui/Logo";
 
 const iconMap = {
   "Code": Code,
@@ -21,37 +21,31 @@ const iconMap = {
 };
 
 export default function HomePage() {
-  // New state for modal and searching
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [posts, setPosts] = useState(mockPosts);
   const [viewAllPosts, setViewAllPosts] = useState(false);
 
-  // Map string icon names to actual icon components
   const categoriesWithIcons = mockCategories.map(category => ({
     ...category,
     icon: iconMap[category.icon as keyof typeof iconMap]
   }));
 
-  // Filter posts by title/excerpt based on search query
   const filteredPosts = posts.filter(post =>
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Show all posts or limit to 3 based on viewAllPosts state
   const postsToDisplay = viewAllPosts ? filteredPosts : filteredPosts.slice(0, 3);
 
-  // Handler for new post submit (add new post to top)
   const handleNewPost = (newPost) => {
-    // Create a complete post object with all required fields
     const completePost = {
       ...newPost,
       id: Date.now().toString(),
       excerpt: newPost.content.substring(0, 120) + (newPost.content.length > 120 ? "..." : ""),
       author: {
-        name: "Current User", // For demo purposes
-        avatar: "https://i.pravatar.cc/100?img=7" 
+        name: "Current User",
+        avatar: "https://i.pravatar.cc/100?img=7"
       },
       category: "General",
       tags: ["general"],
@@ -59,19 +53,16 @@ export default function HomePage() {
       upvoteCount: 0,
       createdAt: new Date().toISOString().split('T')[0]
     };
-    
+
     setPosts([completePost, ...posts]);
     setModalOpen(false);
-    // Clear the search when adding a new post to ensure it's visible
     setSearchQuery("");
   };
 
-  // Handle view all posts
   const handleViewAllPosts = () => {
     setViewAllPosts(true);
   };
 
-  // Handle view less posts (show only 3)
   const handleViewLessPosts = () => {
     setViewAllPosts(false);
   };
@@ -80,18 +71,20 @@ export default function HomePage() {
     <MainLayout>
       <div className="container py-6">
         <div className="mb-8 flex flex-col-reverse justify-between gap-4 md:flex-row md:items-center">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">DevHive Connect</h1>
-            <p className="mt-1 text-lg text-muted-foreground">
-              Where developers collaborate, share knowledge, and grow together
-            </p>
+          <div className="flex items-center gap-4">
+            <Logo size="lg" className="text-primary" />
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">DevHive Connect</h1>
+              <p className="mt-1 text-lg text-muted-foreground">
+                Where developers collaborate, share knowledge, and grow together
+              </p>
+            </div>
           </div>
           <Button className="md:w-auto" size="lg" onClick={() => setModalOpen(true)}>
             <Plus className="mr-1 h-4 w-4" />
             New Post
           </Button>
         </div>
-        {/* Search input for discussions */}
         <div className="mb-8 flex w-full max-w-md items-center relative">
           <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
           <Input
