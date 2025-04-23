@@ -46,6 +46,9 @@ export default function PostPage() {
   const handleComment = (content: string) => {
     // In a real app, this would send the comment to an API
     console.log("New comment:", content);
+    toast({
+      description: "Comment posted successfully",
+    });
   };
 
   if (!post) {
