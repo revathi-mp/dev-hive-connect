@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,8 +6,8 @@ import { Medal, Trophy, Star } from "lucide-react";
 import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
 import { GitHubConnect } from "@/components/profile/GitHubConnect";
 import { RecentActivity } from "@/components/profile/RecentActivity";
+import { ProfilePictureUpload } from "@/components/profile/ProfilePictureUpload";
 
-// Helper to get badges based on reputation score
 function getBadges(reputation: number) {
   const badges = [];
   if (reputation >= 1000) {
@@ -50,10 +49,16 @@ export default function ProfilePage() {
           <div className="md:w-1/3">
             <div className="rounded-lg border bg-card p-6 shadow-sm">
               <div className="flex flex-col items-center text-center">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name[0]}</AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarFallback>{user.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <ProfilePictureUpload
+                    currentAvatar={user.avatar}
+                    onUpdate={(newAvatarUrl) => handleProfileUpdate({ avatar: newAvatarUrl })}
+                  />
+                </div>
                 <h1 className="mt-4 text-2xl font-bold">{user.name}</h1>
                 <p className="text-sm text-muted-foreground">@{user.username}</p>
                 <p className="mt-2 text-sm text-muted-foreground">{user.bio}</p>
