@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,6 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { CommentList } from './CommentList';
 import { ReplyForm } from './ReplyForm';
 import { Comment } from './types';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Code } from "lucide-react";
 
 interface CommentFormProps {
   onSubmit: (content: string) => void;
@@ -111,15 +112,82 @@ export function CommentForm({ onSubmit, existingComments = [] }: CommentFormProp
     }
   };
 
+  const insertCodeBlock = (language: string) => {
+    const codeTemplate = `\`\`\`${language}\n// Your ${language} code here\n\`\`\``;
+    
+    setContent((prevContent) => {
+      return prevContent + (prevContent.length > 0 ? '\n\n' : '') + codeTemplate;
+    });
+    
+    toast({
+      description: `${language.toUpperCase()} code block added. Replace the placeholder with your code.`,
+    });
+  };
+
   return (
     <div className="space-y-6" id="comments">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Textarea
-          placeholder="Write your comment..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="min-h-[100px]"
-        />
+        <div className="relative">
+          <Textarea
+            placeholder="Write your comment..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="min-h-[100px]"
+          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="absolute bottom-2 right-2 h-8 w-8"
+              >
+                <Code className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48">
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Add Code Block</h4>
+                <div className="grid gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start text-xs"
+                    onClick={() => insertCodeBlock('javascript')}
+                  >
+                    JavaScript
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start text-xs"
+                    onClick={() => insertCodeBlock('html')}
+                  >
+                    HTML
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start text-xs"
+                    onClick={() => insertCodeBlock('css')}
+                  >
+                    CSS
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start text-xs"
+                    onClick={() => insertCodeBlock('python')}
+                  >
+                    Python
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Wrap code in ```language ``` tags
+                </p>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
         <Button type="submit">Post Comment</Button>
       </form>
       

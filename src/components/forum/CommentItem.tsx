@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Share, Heart, MessageSquareReply, Eye } from "lucide-react";
 import { Comment } from "./types";
+import { CodePlayground } from './CodePlayground';
 
 interface CommentItemProps {
   comment: Comment;
@@ -23,6 +24,54 @@ export function CommentItem({
   isViewed,
   isReplyOpen
 }: CommentItemProps) {
+  // Function to parse comment content and extract code blocks
+  const renderContent = (content: string) => {
+    // Regular expression to detect code blocks with language specification
+    // Format: ```language\ncode\n```
+    const codeBlockRegex = /```(\w+)\n([\s\S]*?)\n```/g;
+    
+    let lastIndex = 0;
+    const fragments = [];
+    let match;
+    
+    // Find all code blocks
+    while ((match = codeBlockRegex.exec(content)) !== null) {
+      // Add text before the code block
+      if (match.index > lastIndex) {
+        fragments.push(
+          <p key={`text-${lastIndex}`} className="mb-2">
+            {content.substring(lastIndex, match.index)}
+          </p>
+        );
+      }
+      
+      // Add the code playground
+      const language = match[1]; // The language specified
+      const code = match[2]; // The code content
+      
+      fragments.push(
+        <CodePlayground 
+          key={`code-${match.index}`} 
+          code={code} 
+          language={language} 
+        />
+      );
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Add any remaining text
+    if (lastIndex < content.length) {
+      fragments.push(
+        <p key={`text-${lastIndex}`} className="mb-2">
+          {content.substring(lastIndex)}
+        </p>
+      );
+    }
+    
+    return fragments.length > 0 ? fragments : <p className="mb-2">{content}</p>;
+  };
+
   return (
     <div 
       className="border rounded-md p-4 bg-card"
@@ -33,7 +82,11 @@ export function CommentItem({
         <span className="font-medium">{comment.author}</span>
         <span className="text-xs text-muted-foreground">{comment.createdAt}</span>
       </div>
-      <p className="mb-2">{comment.content}</p>
+      
+      <div className="mb-2">
+        {renderContent(comment.content)}
+      </div>
+      
       <div className="flex items-center gap-2 text-sm">
         <Button 
           variant="ghost" 
@@ -84,7 +137,7 @@ export function CommentItem({
                 <span className="font-medium text-sm">{reply.author}</span>
                 <span className="text-xs text-muted-foreground">{reply.createdAt}</span>
               </div>
-              <p className="text-sm">{reply.content}</p>
+              <div className="text-sm">{renderContent(reply.content)}</div>
             </div>
           ))}
         </div>

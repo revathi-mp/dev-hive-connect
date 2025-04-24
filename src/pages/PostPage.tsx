@@ -11,12 +11,48 @@ import { MessageSquare, ThumbsUp, ThumbsDown, Eye, Clock, ArrowUp } from "lucide
 import { useState } from "react";
 import { CommentForm } from "@/components/forum/CommentForm";
 import { useToast } from "@/hooks/use-toast";
+import { Comment } from "@/components/forum/types";
 
 export default function PostPage() {
   const { postId } = useParams<{ postId: string }>();
   const [upvotes, setUpvotes] = useState(0);
   const [hasUpvoted, setHasUpvoted] = useState(false);
   const { toast } = useToast();
+  
+  const [comments, setComments] = useState<Comment[]>([
+    {
+      id: "1",
+      author: "John Doe",
+      content: "Great post! I've been working with React optimization lately and found that useMemo can really help with complex renders.",
+      createdAt: "2 days ago",
+      likes: 12,
+      isLiked: false
+    },
+    {
+      id: "2",
+      author: "Alex Smith",
+      content: "Have you tried using React.memo for component memoization? It really helped in my case.",
+      createdAt: "1 day ago",
+      likes: 8,
+      isLiked: false
+    },
+    {
+      id: "3",
+      author: "Code Master",
+      content: "Here's a simple JavaScript example to calculate Fibonacci numbers:\n\n```javascript\nfunction fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n-1) + fibonacci(n-2);\n}\n\nconsole.log(fibonacci(10)); // Output: 55\n```\n\nYou can try it right here in the playground!",
+      createdAt: "5 hours ago",
+      likes: 15,
+      isLiked: false
+    },
+    {
+      id: "4",
+      author: "Web Designer",
+      content: "Check out this HTML/CSS button:\n\n```html\n<button class=\"fancy-button\">Click me!</button>\n\n<style>\n.fancy-button {\n  background: linear-gradient(45deg, #ff6b6b, #ffa8a8);\n  border: none;\n  color: white;\n  padding: 10px 20px;\n  border-radius: 50px;\n  font-weight: bold;\n  box-shadow: 0 4px 8px rgba(0,0,0,0.1);\n  transition: transform 0.2s, box-shadow 0.2s;\n}\n\n.fancy-button:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 6px 12px rgba(0,0,0,0.15);\n}\n</style>\n```\n\nYou can see how it looks right in the preview!",
+      createdAt: "3 hours ago",
+      likes: 10,
+      isLiked: false
+    }
+  ]);
   
   const post = mockPosts.find(p => p.id === postId);
   const relatedPosts = post 
@@ -44,8 +80,16 @@ export default function PostPage() {
   };
 
   const handleComment = (content: string) => {
-    // In a real app, this would send the comment to an API
-    console.log("New comment:", content);
+    const newComment: Comment = {
+      id: `comment-${Date.now()}`,
+      author: "Current User",
+      content: content,
+      createdAt: "Just now",
+      likes: 0,
+      isLiked: false
+    };
+    
+    setComments(prevComments => [newComment, ...prevComments]);
     toast({
       description: "Comment posted successfully",
     });
@@ -152,61 +196,7 @@ export default function PostPage() {
             
             <div>
               <h2 className="text-xl font-medium mb-4">Leave a comment</h2>
-              <CommentForm onSubmit={handleComment} />
-              
-              <div className="mt-6 space-y-4">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>JD</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium">John Doe</p>
-                          <p className="text-xs text-muted-foreground">2 days ago</p>
-                        </div>
-                        <p className="text-sm mt-1">Great post! I've been working with React optimization lately and found that useMemo can really help with complex renders.</p>
-                        <div className="flex items-center gap-4 mt-2">
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                            <ThumbsUp className="h-3 w-3 mr-1" />
-                            12
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                            Reply
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>AS</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium">Alex Smith</p>
-                          <p className="text-xs text-muted-foreground">1 day ago</p>
-                        </div>
-                        <p className="text-sm mt-1">Have you tried using React.memo for component memoization? It really helped in my case.</p>
-                        <div className="flex items-center gap-4 mt-2">
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                            <ThumbsUp className="h-3 w-3 mr-1" />
-                            8
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                            Reply
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+              <CommentForm onSubmit={handleComment} existingComments={comments} />
             </div>
           </div>
           
