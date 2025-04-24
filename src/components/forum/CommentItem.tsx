@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Share, Heart, MessageSquareReply, Eye } from "lucide-react";
 import { Comment } from "./types";
 import { CodePlayground } from './CodePlayground';
+import { toast } from "@/hooks/use-toast";
 
 interface CommentItemProps {
   comment: Comment;
@@ -26,17 +26,12 @@ export function CommentItem({
 }: CommentItemProps) {
   // Function to parse comment content and extract code blocks
   const renderContent = (content: string) => {
-    // Regular expression to detect code blocks with language specification
-    // Format: ```language\ncode\n```
     const codeBlockRegex = /```(\w+)\n([\s\S]*?)\n```/g;
-    
     let lastIndex = 0;
     const fragments = [];
     let match;
     
-    // Find all code blocks
     while ((match = codeBlockRegex.exec(content)) !== null) {
-      // Add text before the code block
       if (match.index > lastIndex) {
         fragments.push(
           <p key={`text-${lastIndex}`} className="mb-2">
@@ -45,22 +40,27 @@ export function CommentItem({
         );
       }
       
-      // Add the code playground
-      const language = match[1]; // The language specified
-      const code = match[2]; // The code content
-      
       fragments.push(
         <CodePlayground 
           key={`code-${match.index}`} 
-          code={code} 
-          language={language} 
+          code={match[2]}
+          language={match[1]}
+          isEditable={true}
+          onCodeChange={(newCode) => {
+            const beforeCode = content.substring(0, match.index);
+            const afterCode = content.substring(match.index + match[0].length);
+            const updatedCode = `${beforeCode}\`\`\`${match[1]}\n${newCode}\n\`\`\`${afterCode}`;
+            console.log('Code updated:', updatedCode);
+            toast({
+              description: "Code updated successfully",
+            });
+          }}
         />
       );
       
       lastIndex = match.index + match[0].length;
     }
     
-    // Add any remaining text
     if (lastIndex < content.length) {
       fragments.push(
         <p key={`text-${lastIndex}`} className="mb-2">
@@ -70,6 +70,31 @@ export function CommentItem({
     }
     
     return fragments.length > 0 ? fragments : <p className="mb-2">{content}</p>;
+  };
+
+  const handleShare = async () => {
+    try {
+      const shareData = {
+        title: `Comment by ${comment.author}`,
+        text: comment.content,
+        url: `${window.location.origin}${window.location.pathname}#comment-${comment.id}`
+      };
+
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        toast({
+          description: "Comment shared successfully",
+        });
+      } else {
+        throw new Error('Web Share API not supported');
+      }
+    } catch (error) {
+      const shareUrl = `${window.location.origin}${window.location.pathname}#comment-${comment.id}`;
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        description: "Link copied to clipboard",
+      });
+    }
   };
 
   return (
@@ -109,7 +134,7 @@ export function CommentItem({
           variant="ghost" 
           size="sm" 
           className="h-7 px-2 text-xs"
-          onClick={() => onShare(comment.id)}
+          onClick={handleShare}
         >
           <Share className="h-3 w-3 mr-1" />
           Share
