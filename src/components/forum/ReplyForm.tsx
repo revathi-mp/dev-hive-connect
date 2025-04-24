@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Code } from "lucide-react";
+import { Code, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ReplyFormProps {
@@ -93,7 +93,10 @@ export function ReplyForm({
         </Popover>
       </div>
       <div className="mt-2">
-        <Button size="sm" onClick={onSubmit}>Post Reply</Button>
+        <Button size="sm" onClick={onSubmit} className="flex items-center">
+          <Send className="h-3 w-3 mr-1" />
+          Post Reply
+        </Button>
         <Button 
           variant="outline" 
           size="sm" 

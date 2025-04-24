@@ -1,9 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { Play } from "lucide-react";
+import { Play, RotateCw } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface CodePlaygroundProps {
   code: string;
@@ -14,9 +15,11 @@ export function CodePlayground({ code, language }: CodePlaygroundProps) {
   const [output, setOutput] = useState<string>('');
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("code");
+  const { toast } = useToast();
 
   const runCode = () => {
     setIsRunning(true);
+    setActiveTab("result");
     
     try {
       let result = '';
@@ -43,27 +46,46 @@ export function CodePlayground({ code, language }: CodePlaygroundProps) {
             // eslint-disable-next-line no-new-func
             const fn = new Function('console', code);
             fn(console);
-            return result;
+            return result || 'Code executed successfully (no output)';
           } catch (error) {
             return `Error: ${(error as Error).message}`;
           }
         };
         
         result = sandbox(code);
+        toast({
+          description: "JavaScript code executed",
+        });
       } else if (language === 'html') {
         // For HTML, create the preview directly
         result = code;
+        toast({
+          description: "HTML preview generated",
+        });
       } else if (language === 'css') {
         result = 'CSS preview not supported in standalone mode. Use with HTML.';
+        toast({
+          description: "CSS requires HTML to preview",
+        });
       } else if (language === 'python' || language === 'py') {
         result = 'Python execution requires server-side integration.\nConsider using an online Python interpreter or local environment.';
+        toast({
+          description: "Python execution not available in browser",
+        });
       } else {
         result = `Running ${language} code is not supported in this playground.`;
+        toast({
+          description: `${language} is not supported in this playground`,
+        });
       }
       
       setOutput(result);
     } catch (error) {
       setOutput(`Error executing code: ${(error as Error).message}`);
+      toast({
+        variant: "destructive",
+        description: `Error: ${(error as Error).message}`,
+      });
     } finally {
       setIsRunning(false);
     }
@@ -73,6 +95,7 @@ export function CodePlayground({ code, language }: CodePlaygroundProps) {
   const renderHTML = () => {
     if (language !== 'html') return null;
     
+    // Create a secure HTML preview
     return (
       <iframe
         title="HTML Preview"
@@ -81,6 +104,14 @@ export function CodePlayground({ code, language }: CodePlaygroundProps) {
         sandbox="allow-scripts"
       />
     );
+  };
+
+  const resetOutput = () => {
+    setOutput('');
+    setActiveTab("code");
+    toast({
+      description: "Output cleared",
+    });
   };
 
   return (
@@ -94,15 +125,28 @@ export function CodePlayground({ code, language }: CodePlaygroundProps) {
             )}
           </TabsList>
           
-          <Button 
-            size="sm" 
-            onClick={runCode} 
-            disabled={isRunning || language === 'html'}
-            className="h-7 px-2 text-xs flex items-center gap-1"
-          >
-            <Play className="h-3 w-3" />
-            Run
-          </Button>
+          <div className="flex gap-1">
+            {output && (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={resetOutput} 
+                className="h-7 px-2 text-xs flex items-center gap-1"
+              >
+                <RotateCw className="h-3 w-3" />
+                Reset
+              </Button>
+            )}
+            <Button 
+              size="sm" 
+              onClick={runCode} 
+              disabled={isRunning}
+              className="h-7 px-2 text-xs flex items-center gap-1"
+            >
+              <Play className="h-3 w-3" />
+              Run
+            </Button>
+          </div>
         </div>
         
         <TabsContent value="code" className="p-0 m-0">

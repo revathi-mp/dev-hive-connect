@@ -74,16 +74,15 @@ export function CommentItem({
 
   return (
     <div 
-      className="border rounded-md p-4 bg-card"
+      className={`border rounded-md p-4 bg-card ${isReplyOpen ? 'ring-2 ring-primary' : ''}`}
       id={`comment-${comment.id}`}
-      onClick={() => onView(comment.id)}
     >
       <div className="flex justify-between mb-2">
         <span className="font-medium">{comment.author}</span>
         <span className="text-xs text-muted-foreground">{comment.createdAt}</span>
       </div>
       
-      <div className="mb-2">
+      <div className="mb-2" onClick={() => onView(comment.id)}>
         {renderContent(comment.content)}
       </div>
       
@@ -92,10 +91,7 @@ export function CommentItem({
           variant="ghost" 
           size="sm" 
           className={`h-7 px-2 text-xs ${comment.isLiked ? 'text-red-500' : ''}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onLike(comment.id);
-          }}
+          onClick={() => onLike(comment.id)}
         >
           <Heart className={`h-3 w-3 mr-1 ${comment.isLiked ? 'fill-current' : ''}`} />
           {comment.likes}
@@ -103,11 +99,8 @@ export function CommentItem({
         <Button 
           variant="ghost" 
           size="sm" 
-          className="h-7 px-2 text-xs"
-          onClick={(e) => {
-            e.stopPropagation();
-            onReply(comment.id);
-          }}
+          className={`h-7 px-2 text-xs ${isReplyOpen ? 'bg-muted' : ''}`}
+          onClick={() => onReply(comment.id)}
         >
           <MessageSquareReply className="h-3 w-3 mr-1" />
           Reply
@@ -116,10 +109,7 @@ export function CommentItem({
           variant="ghost" 
           size="sm" 
           className="h-7 px-2 text-xs"
-          onClick={(e) => {
-            e.stopPropagation();
-            onShare(comment.id);
-          }}
+          onClick={() => onShare(comment.id)}
         >
           <Share className="h-3 w-3 mr-1" />
           Share
