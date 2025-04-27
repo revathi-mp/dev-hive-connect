@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Share, Heart, MessageSquareReply, Eye } from "lucide-react";
@@ -47,10 +48,13 @@ export function CommentItem({
           language={match[1]}
           isEditable={true}
           onCodeChange={(newCode) => {
+            // Create updated content with new code
             const beforeCode = content.substring(0, match.index);
             const afterCode = content.substring(match.index + match[0].length);
-            const updatedCode = `${beforeCode}\`\`\`${match[1]}\n${newCode}\n\`\`\`${afterCode}`;
-            console.log('Code updated:', updatedCode);
+            const updatedContent = `${beforeCode}\`\`\`${match[1]}\n${newCode}\n\`\`\`${afterCode}`;
+            
+            // Instead of just logging, we could update the comment in a real app
+            console.log('Code updated:', updatedContent);
             toast({
               description: "Code updated successfully",
             });
