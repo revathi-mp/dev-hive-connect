@@ -6,20 +6,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { mockPosts } from "@/data/mockData";
+import { useEffect, useState } from "react";
 
 export default function UserProfilePage() {
-  const { username } = useParams();
+  const { username } = useParams<{ username: string }>();
+  const [userInfo, setUserInfo] = useState<{ name: string; avatar: string }>({
+    name: username || "User",
+    avatar: "https://i.pravatar.cc/100"
+  });
   
-  // Filter posts by the user
+  // Filter posts by the user (case-insensitive)
   const userPosts = mockPosts.filter(
-    post => post.author.name.toLowerCase() === username
+    post => post.author.name.toLowerCase() === (username?.toLowerCase() || '')
   );
 
-  // For demo purposes, using the first post's author info
-  const userInfo = userPosts[0]?.author || {
-    name: username,
-    avatar: "https://i.pravatar.cc/100"
-  };
+  useEffect(() => {
+    // Find the author info if posts exist
+    if (userPosts.length > 0) {
+      setUserInfo(userPosts[0].author);
+    } else {
+      // If no posts found, create a default profile with the username
+      setUserInfo({
+        name: username || "User",
+        avatar: `https://i.pravatar.cc/100?img=${Math.floor(Math.random() * 10) + 1}`
+      });
+    }
+  }, [username, userPosts]);
 
   return (
     <MainLayout>
@@ -28,7 +40,7 @@ export default function UserProfilePage() {
           <CardHeader className="flex flex-row items-center gap-4">
             <Avatar className="h-20 w-20">
               <AvatarImage src={userInfo.avatar} alt={userInfo.name} />
-              <AvatarFallback>{userInfo.name[0]}</AvatarFallback>
+              <AvatarFallback>{userInfo.name ? userInfo.name[0].toUpperCase() : 'U'}</AvatarFallback>
             </Avatar>
             <div>
               <CardTitle className="text-2xl">{userInfo.name}</CardTitle>
@@ -53,7 +65,7 @@ export default function UserProfilePage() {
           ) : (
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
-                No posts yet
+                No posts found for this user
               </CardContent>
             </Card>
           )}
