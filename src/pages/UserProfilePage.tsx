@@ -1,5 +1,5 @@
 
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PostCard } from "@/components/forum/PostCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,23 +15,35 @@ export default function UserProfilePage() {
     avatar: "https://i.pravatar.cc/100"
   });
   
-  // Filter posts by the user (case-insensitive)
+  // Filter posts by the user name (case-insensitive)
+  // Make sure username exists and convert to lowercase for comparison
+  const normalizedUsername = username?.toLowerCase() || '';
   const userPosts = mockPosts.filter(
-    post => post.author.name.toLowerCase() === (username?.toLowerCase() || '')
+    post => post.author.name.toLowerCase() === normalizedUsername
   );
 
+  // Handle user information retrieval
   useEffect(() => {
-    // Find the author info if posts exist
+    console.log("Username param:", username);
+    console.log("Found posts:", userPosts.length);
+    
     if (userPosts.length > 0) {
+      // Use author info from first post
       setUserInfo(userPosts[0].author);
-    } else {
-      // If no posts found, create a default profile with the username
+    } else if (username) {
+      // Create a placeholder profile with consistent avatar
+      const userSeed = username.charCodeAt(0) % 70; // Generate consistent avatar
       setUserInfo({
-        name: username || "User",
-        avatar: `https://i.pravatar.cc/100?img=${Math.floor(Math.random() * 10) + 1}`
+        name: username,
+        avatar: `https://i.pravatar.cc/150?img=${userSeed}`
       });
     }
   }, [username, userPosts]);
+
+  // If username is not provided, redirect to homepage
+  if (!username) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <MainLayout>
@@ -46,7 +58,7 @@ export default function UserProfilePage() {
               <CardTitle className="text-2xl">{userInfo.name}</CardTitle>
               <div className="mt-2 flex gap-2">
                 <Badge variant="secondary">
-                  {userPosts.length} Posts
+                  {userPosts.length} {userPosts.length === 1 ? "Post" : "Posts"}
                 </Badge>
                 <Badge variant="outline">
                   Member since {new Date().getFullYear()}
