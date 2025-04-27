@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Play, Edit2, Save } from "lucide-react";
+import { Play, Edit2, Save, MousePointerClick } from "lucide-react";
 
 interface CodePlaygroundProps {
   code: string;
@@ -101,9 +101,10 @@ export function CodePlayground({
         document.body.appendChild(sandboxContainer);
         
         try {
-          // Create iframe with sandbox attributes for security
+          // Create iframe safely without modifying read-only properties
           const iframe = document.createElement('iframe');
-          iframe.sandbox = 'allow-scripts';
+          // Set attributes using appropriate methods
+          iframe.setAttribute('sandbox', 'allow-scripts');
           iframe.srcdoc = code;
           iframe.style.width = '100%';
           iframe.style.height = '200px';
@@ -204,9 +205,6 @@ export function CodePlayground({
     
     if (onCodeChange) {
       onCodeChange(editedCode);
-      toast({
-        description: "Code saved successfully",
-      });
     }
   };
 
@@ -221,8 +219,9 @@ export function CodePlayground({
                 variant="outline"
                 size="sm"
                 onClick={handleSave}
+                className="flex items-center gap-1"
               >
-                <Save className="h-3 w-3 mr-1" />
+                <Save className="h-3 w-3" />
                 Save
               </Button>
             ) : (
@@ -230,8 +229,9 @@ export function CodePlayground({
                 variant="outline"
                 size="sm"
                 onClick={handleEdit}
+                className="flex items-center gap-1"
               >
-                <Edit2 className="h-3 w-3 mr-1" />
+                <Edit2 className="h-3 w-3" />
                 Edit
               </Button>
             )
@@ -240,8 +240,9 @@ export function CodePlayground({
             variant="default"
             size="sm"
             onClick={handleRun}
+            className="flex items-center gap-1"
           >
-            <Play className="h-3 w-3 mr-1" />
+            <Play className="h-3 w-3" />
             Run
           </Button>
         </div>

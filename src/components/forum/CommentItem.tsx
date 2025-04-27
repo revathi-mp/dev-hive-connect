@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Share, Heart, MessageSquareReply, Eye } from "lucide-react";
+import { Share, Heart, MessageSquareReply, Eye, MousePointerClick } from "lucide-react";
 import { Comment } from "./types";
 import { CodePlayground } from './CodePlayground';
 import { toast } from "@/hooks/use-toast";
@@ -25,6 +25,8 @@ export function CommentItem({
   isViewed,
   isReplyOpen
 }: CommentItemProps) {
+  const [commentContent, setCommentContent] = useState(comment.content);
+  
   // Function to parse comment content and extract code blocks
   const renderContent = (content: string) => {
     const codeBlockRegex = /```(\w+)\n([\s\S]*?)\n```/g;
@@ -48,13 +50,17 @@ export function CommentItem({
           language={match[1]}
           isEditable={true}
           onCodeChange={(newCode) => {
-            // Create updated content with new code
-            const beforeCode = content.substring(0, match.index);
-            const afterCode = content.substring(match.index + match[0].length);
-            const updatedContent = `${beforeCode}\`\`\`${match[1]}\n${newCode}\n\`\`\`${afterCode}`;
+            // Store the match information to fix the "null" error
+            const matchIndex = match.index;
+            const matchLength = match[0].length;
+            const matchLang = match[1];
             
-            // Instead of just logging, we could update the comment in a real app
-            console.log('Code updated:', updatedContent);
+            // Create updated content with new code
+            const beforeCode = content.substring(0, matchIndex);
+            const afterCode = content.substring(matchIndex + matchLength);
+            const updatedContent = `${beforeCode}\`\`\`${matchLang}\n${newCode}\n\`\`\`${afterCode}`;
+            
+            setCommentContent(updatedContent);
             toast({
               description: "Code updated successfully",
             });
@@ -112,7 +118,7 @@ export function CommentItem({
       </div>
       
       <div className="mb-2" onClick={() => onView(comment.id)}>
-        {renderContent(comment.content)}
+        {renderContent(commentContent)}
       </div>
       
       <div className="flex items-center gap-2 text-sm">
