@@ -1,4 +1,3 @@
-
 // Mock data for development purposes
 export const mockPosts = [
   {
@@ -86,6 +85,50 @@ export const mockPosts = [
     commentCount: 19,
     upvoteCount: 37,
     createdAt: "2023-04-13"
+  },
+  {
+    id: "7",
+    title: "How to prepare for technical interviews?",
+    excerpt: "I have interviews coming up with major tech companies. Looking for advice on data structures, algorithms, and system design preparation.",
+    author: {
+      name: "John Smith",
+      avatar: "https://i.pravatar.cc/100?img=7"
+    },
+    category: "Career",
+    tags: ["interviews", "career-growth", "algorithms"],
+    commentCount: 45,
+    upvoteCount: 89,
+    createdAt: "2023-04-12",
+    isHot: true
+  },
+  {
+    id: "8",
+    title: "Transitioning from Backend to Full Stack",
+    excerpt: "I'm a backend developer looking to expand my skills to frontend. What's the best learning path and resources?",
+    author: {
+      name: "Lisa Chen",
+      avatar: "https://i.pravatar.cc/100?img=8"
+    },
+    category: "Career",
+    tags: ["career-change", "full-stack", "learning"],
+    commentCount: 28,
+    upvoteCount: 67,
+    createdAt: "2023-04-11"
+  },
+  {
+    id: "9",
+    title: "Negotiating Tech Job Offers",
+    excerpt: "Tips and strategies for negotiating salary, equity, and benefits in tech companies. Share your experiences!",
+    author: {
+      name: "Michael Brown",
+      avatar: "https://i.pravatar.cc/100?img=9"
+    },
+    category: "Career",
+    tags: ["negotiation", "salary", "job-offers"],
+    commentCount: 52,
+    upvoteCount: 95,
+    createdAt: "2023-04-10",
+    isHot: true
   }
 ];
 
