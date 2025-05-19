@@ -8,41 +8,75 @@ import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// Define validation schema
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+
+// Mock user database for demo purposes
+const MOCK_USERS = [
+  { email: "test@example.com", password: "password123" },
+  { email: "admin@devhive.com", password: "admin123" },
+  { email: "user@devhive.com", password: "user123" },
+];
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const form = useForm({
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = async (data: { email: string; password: string }) => {
+  const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      // In a real app, this would connect to your authentication service
       console.log("Login attempt:", data);
       
-      // Simulate successful login
-      setTimeout(() => {
+      // Simulate authentication check - in a real app this would be an API call
+      const user = MOCK_USERS.find(
+        user => user.email === data.email && user.password === data.password
+      );
+      
+      if (user) {
+        // Successful login
+        setTimeout(() => {
+          toast({
+            title: "Login successful",
+            description: "Welcome back to DevHive Connect!",
+          });
+          // Store login state in localStorage (in a real app, you'd use a JWT or session)
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("userEmail", data.email);
+          navigate("/home");
+        }, 1000);
+      } else {
+        // Failed login
         toast({
-          title: "Login successful",
-          description: "Welcome back to DevHive Connect!",
+          title: "Login failed",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive",
         });
-        navigate("/home");
-      }, 1000);
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error("Login error:", error);
       toast({
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: "An error occurred during login. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -50,7 +84,7 @@ export default function LoginPage() {
   return (
     <AuthLayout
       title="Sign in to your account"
-      description="Enter your email to sign in to your account"
+      description="Enter your email and password to sign in to your account"
     >
       <div className="grid gap-6">
         <Form {...form}>

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -19,9 +19,18 @@ import { useToast } from "@/hooks/use-toast";
 export function Header() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Check if user is logged in from localStorage on component mount
+  useEffect(() => {
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const email = localStorage.getItem("userEmail") || "";
+    setIsLoggedIn(loggedIn);
+    setUserEmail(email);
+  }, []);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -35,6 +44,9 @@ export function Header() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setUserEmail("");
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("userEmail");
     toast({
       title: "Logged Out",
       description: "You have been logged out successfully.",
@@ -48,6 +60,16 @@ export function Header() {
       title: "Notifications",
       description: "You have no new notifications.",
     });
+  };
+
+  // Generate initials from email
+  const getInitials = (email: string) => {
+    if (!email) return "GU"; // Guest User
+    const parts = email.split('@');
+    if (parts.length > 0) {
+      return parts[0].substring(0, 2).toUpperCase();
+    }
+    return "GU";
   };
 
   return (
@@ -105,7 +127,7 @@ export function Header() {
                   <Button variant="ghost" size="icon" asChild>
                     <Link to="/profile">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback>SJ</AvatarFallback>
+                        <AvatarFallback>{getInitials(userEmail)}</AvatarFallback>
                       </Avatar>
                     </Link>
                   </Button>
