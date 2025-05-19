@@ -23,9 +23,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 const MOCK_USERS = [
   { email: "test@example.com", password: "password123" },
   { email: "admin@devhive.com", password: "admin123" },
-  { email: "user@devhive.com", password: "user123" },
-  // Adding test account from logs
-  { email: "revathimp69@gmail.com", password: "#Varuu_rev2004" }
+  { email: "user@devhive.com", password: "user123" }
 ];
 
 export default function LoginPage() {
