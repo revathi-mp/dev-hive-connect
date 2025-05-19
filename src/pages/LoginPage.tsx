@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -44,32 +43,24 @@ export default function LoginPage() {
     try {
       console.log("Login attempt:", data);
       
-      // Find user with matching email and password
-      const user = MOCK_USERS.find(
-        user => user.email === data.email && user.password === data.password
-      );
+      // Find user with matching email
+      const user = MOCK_USERS.find(user => user.email === data.email);
       
+      // Case 1: If this is a known user, verify password
       if (user) {
-        // Successful login
-        setTimeout(() => {
-          toast({
-            title: "Login successful",
-            description: "Welcome back to DevHive Connect!",
-          });
-          // Store login state in localStorage
-          localStorage.setItem("isLoggedIn", "true");
-          localStorage.setItem("userEmail", data.email);
-          navigate("/home");
-          setIsLoading(false);
-        }, 1000);
-      } else {
-        // Failed login
-        toast({
-          title: "Login failed",
-          description: "Invalid email or password. Please try again.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
+        if (user.password === data.password) {
+          handleSuccessfulLogin(data.email);
+        } else {
+          handleFailedLogin("Incorrect password. Please try again.");
+        }
+      } 
+      // Case 2: For demo purposes, any valid email with password "password123" can login
+      else if (data.password === "password123") {
+        handleSuccessfulLogin(data.email);
+      } 
+      // Case 3: All other combinations fail
+      else {
+        handleFailedLogin("Invalid email or password. Please try again.");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -80,6 +71,29 @@ export default function LoginPage() {
       });
       setIsLoading(false);
     }
+  };
+
+  const handleSuccessfulLogin = (email: string) => {
+    setTimeout(() => {
+      toast({
+        title: "Login successful",
+        description: "Welcome back to DevHive Connect!",
+      });
+      // Store login state in localStorage
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userEmail", email);
+      navigate("/home");
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  const handleFailedLogin = (message: string) => {
+    toast({
+      title: "Login failed",
+      description: message,
+      variant: "destructive",
+    });
+    setIsLoading(false);
   };
 
   return (
