@@ -24,6 +24,8 @@ const MOCK_USERS = [
   { email: "test@example.com", password: "password123" },
   { email: "admin@devhive.com", password: "admin123" },
   { email: "user@devhive.com", password: "user123" },
+  // Adding test account from logs
+  { email: "revathimp69@gmail.com", password: "#Varuu_rev2004" }
 ];
 
 export default function LoginPage() {
@@ -44,7 +46,7 @@ export default function LoginPage() {
     try {
       console.log("Login attempt:", data);
       
-      // Simulate authentication check - in a real app this would be an API call
+      // Find user with matching email and password
       const user = MOCK_USERS.find(
         user => user.email === data.email && user.password === data.password
       );
@@ -56,10 +58,11 @@ export default function LoginPage() {
             title: "Login successful",
             description: "Welcome back to DevHive Connect!",
           });
-          // Store login state in localStorage (in a real app, you'd use a JWT or session)
+          // Store login state in localStorage
           localStorage.setItem("isLoggedIn", "true");
           localStorage.setItem("userEmail", data.email);
           navigate("/home");
+          setIsLoading(false);
         }, 1000);
       } else {
         // Failed login
