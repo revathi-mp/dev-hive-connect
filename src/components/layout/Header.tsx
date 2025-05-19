@@ -33,14 +33,6 @@ export function Header() {
     });
   };
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    toast({
-      title: "Logged In Successfully",
-      description: "Welcome back to DevHive Connect!",
-    });
-  };
-
   const handleLogout = () => {
     setIsLoggedIn(false);
     toast({
@@ -120,9 +112,11 @@ export function Header() {
                 </>
               ) : (
                 <>
-                  <Button variant="outline" size="sm" className="gap-1" onClick={handleLogin}>
-                    <LogIn className="h-4 w-4" />
-                    Login
+                  <Button variant="outline" size="sm" className="gap-1" asChild>
+                    <Link to="/login">
+                      <LogIn className="h-4 w-4" />
+                      Login
+                    </Link>
                   </Button>
                   <Button size="sm" className="gap-1" asChild>
                     <Link to="/signup">
