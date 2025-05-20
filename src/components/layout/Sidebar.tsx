@@ -9,7 +9,8 @@ import {
   MessageSquare,
   Settings,
   Users,
-  Tag
+  Tag,
+  Briefcase
 } from "lucide-react";
 
 const categories = [
@@ -41,6 +42,13 @@ export function Sidebar() {
               >
                 <MessageSquare className="mr-2 h-4 w-4" />
                 Trending
+              </Link>
+              <Link
+                to="/interview-questions"
+                className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              >
+                <Briefcase className="mr-2 h-4 w-4" />
+                Interview Questions
               </Link>
               <Link
                 to="/tags"

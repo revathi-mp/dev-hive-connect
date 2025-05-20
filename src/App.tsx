@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,6 +21,7 @@ import AboutPage from "./pages/AboutPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import UserProfilePage from "./pages/UserProfilePage";
+import InterviewQuestionsPage from "./pages/InterviewQuestionsPage";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/trending" element={<TrendingPage />} />
+          <Route path="/interview-questions" element={<InterviewQuestionsPage />} />
           <Route path="/tag/:tagName" element={<TagPage />} />
           <Route path="/tags" element={<TagsPage />} />
           <Route path="/category/:categorySlug" element={<CategoryPage />} />
