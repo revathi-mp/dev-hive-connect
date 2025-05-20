@@ -22,6 +22,7 @@ import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import UserProfilePage from "./pages/UserProfilePage";
 import InterviewQuestionsPage from "./pages/InterviewQuestionsPage";
+import InterviewQuestionDetailPage from "./pages/InterviewQuestionDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/home" element={<HomePage />} />
           <Route path="/trending" element={<TrendingPage />} />
           <Route path="/interview-questions" element={<InterviewQuestionsPage />} />
+          <Route path="/interview-questions/:questionId" element={<InterviewQuestionDetailPage />} />
           <Route path="/tag/:tagName" element={<TagPage />} />
           <Route path="/tags" element={<TagsPage />} />
           <Route path="/category/:categorySlug" element={<CategoryPage />} />

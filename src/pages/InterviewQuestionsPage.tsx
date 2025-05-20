@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,6 +96,7 @@ const difficultyLevels = ["Easy", "Medium", "Hard"];
 
 export default function InterviewQuestionsPage() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Questions state
   const [questions, setQuestions] = useState<InterviewQuestion[]>(initialInterviewQuestions);
@@ -134,13 +136,20 @@ export default function InterviewQuestionsPage() {
     currentPage * ITEMS_PER_PAGE
   );
 
+  // Navigate to question detail page
+  const handleQuestionClick = (questionId: string) => {
+    navigate(`/interview-questions/${questionId}`);
+  };
+
   // Handle new question submission
   const handleQuestionSubmit = (newQuestion: InterviewQuestion) => {
     setQuestions(prevQuestions => [newQuestion, ...prevQuestions]);
   };
 
   // Handle upvote
-  const handleUpvote = (questionId: string) => {
+  const handleUpvote = (e: React.MouseEvent, questionId: string) => {
+    e.stopPropagation(); // Prevent card click navigation
+    
     setQuestions(prevQuestions =>
       prevQuestions.map(question =>
         question.id === questionId
@@ -298,7 +307,11 @@ export default function InterviewQuestionsPage() {
           <div className="space-y-4">
             {paginatedQuestions.length > 0 ? (
               paginatedQuestions.map(question => (
-                <Card key={question.id} className="transition-all hover:shadow-md">
+                <Card 
+                  key={question.id} 
+                  className="transition-all hover:shadow-md cursor-pointer" 
+                  onClick={() => handleQuestionClick(question.id)}
+                >
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-xl">{question.title}</CardTitle>
@@ -330,15 +343,15 @@ export default function InterviewQuestionsPage() {
                         variant="ghost" 
                         size="sm" 
                         className="flex items-center gap-1"
-                        onClick={() => handleUpvote(question.id)}
+                        onClick={(e) => handleUpvote(e, question.id)}
                       >
                         <ThumbsUp className="h-4 w-4" />
                         <span>{question.upvotes}</span>
                       </Button>
-                      <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                      <div className="flex items-center gap-1">
                         <MessageSquare className="h-4 w-4" />
                         <span>{question.answers}</span>
-                      </Button>
+                      </div>
                     </div>
                   </CardFooter>
                 </Card>
