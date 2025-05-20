@@ -80,17 +80,17 @@ const difficultyLevels = ["Easy", "Medium", "Hard"];
 
 export default function InterviewQuestionsPage() {
   // Filter states
-  const [companyFilter, setCompanyFilter] = useState<string>("");
-  const [roleFilter, setRoleFilter] = useState<string>("");
-  const [difficultyFilter, setDifficultyFilter] = useState<string>("");
+  const [companyFilter, setCompanyFilter] = useState<string>("all-companies");
+  const [roleFilter, setRoleFilter] = useState<string>("all-roles");
+  const [difficultyFilter, setDifficultyFilter] = useState<string>("all-difficulties");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Apply filters
   const filteredQuestions = mockInterviewQuestions.filter(question => {
     return (
-      (companyFilter === "" || question.company === companyFilter) &&
-      (roleFilter === "" || question.role === roleFilter) &&
-      (difficultyFilter === "" || question.difficulty === difficultyFilter) &&
+      (companyFilter === "all-companies" || question.company === companyFilter) &&
+      (roleFilter === "all-roles" || question.role === roleFilter) &&
+      (difficultyFilter === "all-difficulties" || question.difficulty === difficultyFilter) &&
       (searchQuery === "" || 
        question.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
        question.description.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -142,7 +142,7 @@ export default function InterviewQuestionsPage() {
                   <SelectValue placeholder="Company" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Companies</SelectItem>
+                  <SelectItem value="all-companies">All Companies</SelectItem>
                   {companies.map(company => (
                     <SelectItem key={company} value={company}>{company}</SelectItem>
                   ))}
@@ -156,7 +156,7 @@ export default function InterviewQuestionsPage() {
                   <SelectValue placeholder="Role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Roles</SelectItem>
+                  <SelectItem value="all-roles">All Roles</SelectItem>
                   {roles.map(role => (
                     <SelectItem key={role} value={role}>{role}</SelectItem>
                   ))}
@@ -170,7 +170,7 @@ export default function InterviewQuestionsPage() {
                   <SelectValue placeholder="Difficulty" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Difficulties</SelectItem>
+                  <SelectItem value="all-difficulties">All Difficulties</SelectItem>
                   {difficultyLevels.map(level => (
                     <SelectItem key={level} value={level}>{level}</SelectItem>
                   ))}
