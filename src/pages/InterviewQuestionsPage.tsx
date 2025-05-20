@@ -6,11 +6,27 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Briefcase, User, Star, Plus } from "lucide-react";
+import { Briefcase, User, Star, Plus, Search, Filter, ThumbsUp, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { NewQuestionModal } from "@/components/interview/NewQuestionModal";
+import { useToast } from "@/hooks/use-toast";
+
+// Types
+interface InterviewQuestion {
+  id: string;
+  title: string;
+  description: string;
+  company: string;
+  role: string;
+  difficulty: string;
+  postedBy: string;
+  postedDate: string;
+  upvotes: number;
+  answers: number;
+}
 
 // Sample interview questions data
-const mockInterviewQuestions = [
+const initialInterviewQuestions = [
   {
     id: "1",
     title: "Implement a binary search tree",
@@ -73,20 +89,34 @@ const mockInterviewQuestions = [
   }
 ];
 
-// Unique filter options extracted from the data
-const companies = [...new Set(mockInterviewQuestions.map(q => q.company))];
-const roles = [...new Set(mockInterviewQuestions.map(q => q.role))];
+// Constants
+const ITEMS_PER_PAGE = 5;
 const difficultyLevels = ["Easy", "Medium", "Hard"];
 
 export default function InterviewQuestionsPage() {
+  const { toast } = useToast();
+  
+  // Questions state
+  const [questions, setQuestions] = useState<InterviewQuestion[]>(initialInterviewQuestions);
+  
   // Filter states
   const [companyFilter, setCompanyFilter] = useState<string>("all-companies");
   const [roleFilter, setRoleFilter] = useState<string>("all-roles");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all-difficulties");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Unique filter options extracted from the data
+  const companies = [...new Set(questions.map(q => q.company))];
+  const roles = [...new Set(questions.map(q => q.role))];
 
   // Apply filters
-  const filteredQuestions = mockInterviewQuestions.filter(question => {
+  const filteredQuestions = questions.filter(question => {
     return (
       (companyFilter === "all-companies" || question.company === companyFilter) &&
       (roleFilter === "all-roles" || question.role === roleFilter) &&
@@ -97,6 +127,34 @@ export default function InterviewQuestionsPage() {
     );
   });
 
+  // Paginate results
+  const totalPages = Math.ceil(filteredQuestions.length / ITEMS_PER_PAGE);
+  const paginatedQuestions = filteredQuestions.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Handle new question submission
+  const handleQuestionSubmit = (newQuestion: InterviewQuestion) => {
+    setQuestions(prevQuestions => [newQuestion, ...prevQuestions]);
+  };
+
+  // Handle upvote
+  const handleUpvote = (questionId: string) => {
+    setQuestions(prevQuestions =>
+      prevQuestions.map(question =>
+        question.id === questionId
+          ? { ...question, upvotes: question.upvotes + 1 }
+          : question
+      )
+    );
+    
+    toast({
+      description: "Question upvoted!",
+      duration: 2000,
+    });
+  };
+
   // Get difficulty badge color
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -105,6 +163,15 @@ export default function InterviewQuestionsPage() {
       case "Hard": return "bg-red-100 text-red-800 hover:bg-red-100";
       default: return "bg-gray-100 text-gray-800 hover:bg-gray-100";
     }
+  };
+
+  // Reset all filters
+  const resetFilters = () => {
+    setCompanyFilter("all-companies");
+    setRoleFilter("all-roles");
+    setDifficultyFilter("all-difficulties");
+    setSearchQuery("");
+    setCurrentPage(1);
   };
 
   return (
@@ -119,7 +186,7 @@ export default function InterviewQuestionsPage() {
                 Share and discuss real-world interview questions
               </p>
             </div>
-            <Button className="md:w-auto" size="lg">
+            <Button className="md:w-auto" size="lg" onClick={() => setIsModalOpen(true)}>
               <Plus className="mr-1 h-4 w-4" />
               Post Question
             </Button>
@@ -127,16 +194,23 @@ export default function InterviewQuestionsPage() {
 
           {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search questions..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1); // Reset to first page on search
+                }}
+                className="pl-9"
               />
             </div>
             <div>
-              <Select value={companyFilter} onValueChange={setCompanyFilter}>
+              <Select value={companyFilter} onValueChange={(value) => {
+                setCompanyFilter(value);
+                setCurrentPage(1);
+              }}>
                 <SelectTrigger className="w-full">
                   <Briefcase className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Company" />
@@ -150,7 +224,10 @@ export default function InterviewQuestionsPage() {
               </Select>
             </div>
             <div>
-              <Select value={roleFilter} onValueChange={setRoleFilter}>
+              <Select value={roleFilter} onValueChange={(value) => {
+                setRoleFilter(value);
+                setCurrentPage(1);
+              }}>
                 <SelectTrigger className="w-full">
                   <User className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Role" />
@@ -164,7 +241,10 @@ export default function InterviewQuestionsPage() {
               </Select>
             </div>
             <div>
-              <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
+              <Select value={difficultyFilter} onValueChange={(value) => {
+                setDifficultyFilter(value);
+                setCurrentPage(1);
+              }}>
                 <SelectTrigger className="w-full">
                   <Star className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Difficulty" />
@@ -179,11 +259,46 @@ export default function InterviewQuestionsPage() {
             </div>
           </div>
 
+          {/* Active filters display and reset */}
+          {(companyFilter !== "all-companies" || roleFilter !== "all-roles" || difficultyFilter !== "all-difficulties" || searchQuery) && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-medium">Active filters:</span>
+              
+              {companyFilter !== "all-companies" && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Company: {companyFilter}
+                </Badge>
+              )}
+              
+              {roleFilter !== "all-roles" && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Role: {roleFilter}
+                </Badge>
+              )}
+              
+              {difficultyFilter !== "all-difficulties" && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Difficulty: {difficultyFilter}
+                </Badge>
+              )}
+              
+              {searchQuery && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Search: {searchQuery}
+                </Badge>
+              )}
+              
+              <Button variant="ghost" size="sm" onClick={resetFilters} className="h-7 px-2 text-xs">
+                Clear all
+              </Button>
+            </div>
+          )}
+
           {/* Results */}
           <div className="space-y-4">
-            {filteredQuestions.length > 0 ? (
-              filteredQuestions.map(question => (
-                <Card key={question.id}>
+            {paginatedQuestions.length > 0 ? (
+              paginatedQuestions.map(question => (
+                <Card key={question.id} className="transition-all hover:shadow-md">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-xl">{question.title}</CardTitle>
@@ -206,13 +321,24 @@ export default function InterviewQuestionsPage() {
                       </Badge>
                     </div>
                   </CardContent>
-                  <CardFooter className="flex justify-between text-sm text-muted-foreground">
-                    <div>
+                  <CardFooter className="flex flex-col sm:flex-row justify-between gap-4">
+                    <div className="text-sm text-muted-foreground">
                       Posted by {question.postedBy} on {question.postedDate}
                     </div>
                     <div className="flex gap-4">
-                      <span>{question.upvotes} upvotes</span>
-                      <span>{question.answers} answers</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="flex items-center gap-1"
+                        onClick={() => handleUpvote(question.id)}
+                      >
+                        <ThumbsUp className="h-4 w-4" />
+                        <span>{question.upvotes}</span>
+                      </Button>
+                      <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                        <MessageSquare className="h-4 w-4" />
+                        <span>{question.answers}</span>
+                      </Button>
                     </div>
                   </CardFooter>
                 </Card>
@@ -220,34 +346,57 @@ export default function InterviewQuestionsPage() {
             ) : (
               <div className="p-8 text-center border rounded-md">
                 <p className="text-muted-foreground">No interview questions found matching your criteria.</p>
+                <Button variant="outline" className="mt-4" onClick={resetFilters}>
+                  <Filter className="mr-2 h-4 w-4" />
+                  Reset Filters
+                </Button>
               </div>
             )}
           </div>
 
           {/* Pagination */}
-          {filteredQuestions.length > 0 && (
+          {filteredQuestions.length > ITEMS_PER_PAGE && (
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious href="#" />
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
                 </PaginationItem>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <PaginationItem key={page}>
+                    <PaginationLink 
+                      isActive={currentPage === page}
+                      onClick={() => setCurrentPage(page)}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
                 <PaginationItem>
-                  <PaginationLink href="#" isActive>1</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#">2</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#">3</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext href="#" />
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
           )}
         </div>
       </div>
+      
+      {/* Question posting modal */}
+      <NewQuestionModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSubmit={handleQuestionSubmit}
+        companies={companies}
+        roles={roles}
+      />
     </MainLayout>
   );
 }
