@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import MainLayout from "@/components/layout/MainLayout";
+import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { InterviewQuestionsTable } from "@/components/admin/InterviewQuestionsTable";
 import { Shield } from "lucide-react";
