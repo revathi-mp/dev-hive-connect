@@ -8,13 +8,29 @@ import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { authService } from "@/services/supabaseService";
+import { profilesService } from "@/services/supabaseService";
+
+// Define validation schema
+const signupSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const form = useForm({
+  const form = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -24,26 +40,47 @@ export default function SignupPage() {
     },
   });
 
-  const onSubmit = async (data: {
-    firstName: string;
-    lastName: string;
-    username: string;
-    email: string;
-    password: string;
-  }) => {
+  const onSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
     try {
-      // In a real app, this would connect to your registration service
       console.log("Signup attempt:", data);
       
-      // Simulate successful registration
-      setTimeout(() => {
+      // Use auth service for signup
+      const { data: authData, error } = await authService.signup(data.email, data.password);
+      
+      if (error) {
+        console.error("Supabase auth error:", error);
+        toast({
+          title: "Signup failed",
+          description: error.message || "Please check your information and try again.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      if (authData.user) {
+        // Create a profile for the new user
+        const profileData = {
+          id: authData.user.id,
+          username: data.username,
+          full_name: `${data.firstName} ${data.lastName}`,
+          created_at: new Date().toISOString(),
+        };
+        
+        await profilesService.updateProfile(authData.user.id, profileData);
+        
         toast({
           title: "Account created successfully",
-          description: "Welcome to DevHive Connect!",
+          description: "Welcome to DevHive Connect! Please check your email to verify your account.",
         });
+        
+        // Store user info in localStorage
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userEmail", data.email);
+        
         navigate("/home");
-      }, 1000);
+      }
     } catch (error) {
       console.error("Signup error:", error);
       toast({
@@ -53,6 +90,21 @@ export default function SignupPage() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGithubLogin = async () => {
+    try {
+      const { error } = await authService.signInWithGithub();
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      toast({
+        title: "GitHub sign-in",
+        description: "Failed to initiate GitHub authentication.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -177,12 +229,7 @@ export default function SignupPage() {
         <Button 
           variant="outline" 
           className="w-full" 
-          onClick={() => {
-            toast({
-              title: "GitHub sign-up",
-              description: "GitHub registration would be implemented here.",
-            });
-          }}
+          onClick={handleGithubLogin}
           disabled={isLoading}
         >
           <Github className="mr-2 h-4 w-4" />
