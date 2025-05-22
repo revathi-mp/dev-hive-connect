@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Post, Comment, UserProfile, Tag, Category, InterviewQuestion } from "@/types/database";
 
 // Auth Services
 export const authService = {
@@ -53,74 +54,74 @@ export const authService = {
 // Posts Service (for forum posts)
 export const postsService = {
   getPosts: async () => {
-    return await supabase.from('posts').select('*');
+    return await (supabase.from('posts') as any).select('*');
   },
   
   getPostById: async (id: string) => {
-    return await supabase.from('posts').select('*').eq('id', id).single();
+    return await (supabase.from('posts') as any).select('*').eq('id', id).single();
   },
   
-  createPost: async (postData: any) => {
-    return await supabase.from('posts').insert(postData);
+  createPost: async (postData: Partial<Post>) => {
+    return await (supabase.from('posts') as any).insert(postData);
   },
   
-  updatePost: async (id: string, postData: any) => {
-    return await supabase.from('posts').update(postData).eq('id', id);
+  updatePost: async (id: string, postData: Partial<Post>) => {
+    return await (supabase.from('posts') as any).update(postData).eq('id', id);
   },
   
   deletePost: async (id: string) => {
-    return await supabase.from('posts').delete().eq('id', id);
+    return await (supabase.from('posts') as any).delete().eq('id', id);
   },
   
   getPostsByTag: async (tag: string) => {
-    return await supabase.from('posts').select('*').contains('tags', [tag]);
+    return await (supabase.from('posts') as any).select('*').contains('tags', [tag]);
   }
 };
 
 // Comments Service
 export const commentsService = {
   getCommentsByPostId: async (postId: string) => {
-    return await supabase
-      .from('comments')
+    return await (supabase
+      .from('comments') as any)
       .select('*')
       .eq('post_id', postId)
       .order('created_at', { ascending: false });
   },
   
-  createComment: async (commentData: any) => {
-    return await supabase.from('comments').insert(commentData);
+  createComment: async (commentData: Partial<Comment>) => {
+    return await (supabase.from('comments') as any).insert(commentData);
   },
   
-  updateComment: async (id: string, commentData: any) => {
-    return await supabase.from('comments').update(commentData).eq('id', id);
+  updateComment: async (id: string, commentData: Partial<Comment>) => {
+    return await (supabase.from('comments') as any).update(commentData).eq('id', id);
   },
   
   deleteComment: async (id: string) => {
-    return await supabase.from('comments').delete().eq('id', id);
+    return await (supabase.from('comments') as any).delete().eq('id', id);
   }
 };
 
 // User Profiles Service
 export const profilesService = {
   getProfileById: async (userId: string) => {
-    return await supabase
-      .from('profiles')
+    return await (supabase
+      .from('profiles') as any)
       .select('*')
       .eq('id', userId)
       .single();
   },
   
   getProfileByUsername: async (username: string) => {
-    return await supabase
-      .from('profiles')
+    return await (supabase
+      .from('profiles') as any)
       .select('*')
       .eq('username', username)
       .single();
   },
   
-  updateProfile: async (userId: string, profileData: any) => {
-    return await supabase
-      .from('profiles')
+  updateProfile: async (userId: string, profileData: Partial<UserProfile>) => {
+    return await (supabase
+      .from('profiles') as any)
       .update(profileData)
       .eq('id', userId);
   },
@@ -130,14 +131,14 @@ export const profilesService = {
     const fileName = `${userId}-${Math.random()}.${fileExt}`;
     const filePath = `avatar/${fileName}`;
     
-    const { error } = await supabase.storage
-      .from('profiles')
+    const { error } = await (supabase.storage
+      .from('profiles') as any)
       .upload(filePath, file);
       
     if (error) throw error;
     
-    const { data } = supabase.storage
-      .from('profiles')
+    const { data } = (supabase.storage
+      .from('profiles') as any)
       .getPublicUrl(filePath);
       
     // Update the profile with the new avatar URL
@@ -152,23 +153,23 @@ export const profilesService = {
 // Tags Service
 export const tagsService = {
   getAllTags: async () => {
-    return await supabase.from('tags').select('*');
+    return await (supabase.from('tags') as any).select('*');
   },
   
   getPopularTags: async (limit = 10) => {
-    return await supabase.from('tags').select('*').order('count', { ascending: false }).limit(limit);
+    return await (supabase.from('tags') as any).select('*').order('count', { ascending: false }).limit(limit);
   }
 };
 
 // Categories Service
 export const categoriesService = {
   getAllCategories: async () => {
-    return await supabase.from('categories').select('*');
+    return await (supabase.from('categories') as any).select('*');
   },
   
   getCategoryBySlug: async (slug: string) => {
-    return await supabase
-      .from('categories')
+    return await (supabase
+      .from('categories') as any)
       .select('*')
       .eq('slug', slug)
       .single();
@@ -178,18 +179,18 @@ export const categoriesService = {
 // Interview Questions Service
 export const interviewQuestionsService = {
   getAllQuestions: async () => {
-    return await supabase.from('interview_questions').select('*');
+    return await (supabase.from('interview_questions') as any).select('*');
   },
   
   getQuestionById: async (id: string) => {
-    return await supabase
-      .from('interview_questions')
+    return await (supabase
+      .from('interview_questions') as any)
       .select('*')
       .eq('id', id)
       .single();
   },
   
-  createQuestion: async (questionData: any) => {
-    return await supabase.from('interview_questions').insert(questionData);
+  createQuestion: async (questionData: Partial<InterviewQuestion>) => {
+    return await (supabase.from('interview_questions') as any).insert(questionData);
   }
 };
