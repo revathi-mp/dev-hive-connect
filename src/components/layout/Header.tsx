@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import {
   LogOut
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { authService } from "@/services/supabaseService";
 
 export function Header() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -27,7 +28,7 @@ export function Header() {
   // Check if user is logged in from Supabase session
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const session = await authService.getCurrentSession();
       
       if (session) {
         setIsLoggedIn(true);
@@ -45,7 +46,8 @@ export function Header() {
     
     checkSession();
     
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    // Listen for auth state changes
+    const { data: authListener } = authService.onAuthStateChange((event: string, session: any) => {
       if (event === 'SIGNED_IN' && session) {
         setIsLoggedIn(true);
         setUserEmail(session.user.email || "");
@@ -60,7 +62,9 @@ export function Header() {
     });
     
     return () => {
-      authListener.subscription.unsubscribe();
+      if (authListener && authListener.subscription) {
+        authListener.subscription.unsubscribe();
+      }
     };
   }, []);
 
@@ -76,7 +80,7 @@ export function Header() {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      await authService.logout();
       setIsLoggedIn(false);
       setUserEmail("");
       localStorage.removeItem("isLoggedIn");

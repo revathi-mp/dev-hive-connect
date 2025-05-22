@@ -6,7 +6,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, ArrowRight, MailCheck } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { authService } from "@/services/supabaseService";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -30,10 +30,8 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true);
     
     try {
-      // Use Supabase for password reset
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/reset-password',
-      });
+      // Use auth service for password reset
+      const { error } = await authService.resetPassword(email);
       
       if (error) {
         throw error;

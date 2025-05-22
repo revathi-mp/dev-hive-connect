@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { supabase } from "@/integrations/supabase/client";
+import { authService } from "@/services/supabaseService";
 
 // Define validation schema
 const loginSchema = z.object({
@@ -38,11 +38,8 @@ export default function LoginPage() {
     try {
       console.log("Login attempt:", data.email);
       
-      // Use Supabase authentication
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
+      // Use auth service for login
+      const { data: authData, error } = await authService.login(data.email, data.password);
       
       if (error) {
         console.error("Supabase auth error:", error);
@@ -81,6 +78,21 @@ export default function LoginPage() {
       navigate("/home");
       setIsLoading(false);
     }, 1000);
+  };
+
+  const handleGithubLogin = async () => {
+    try {
+      const { error } = await authService.signInWithGithub();
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      toast({
+        title: "GitHub sign-in",
+        description: "Failed to initiate GitHub authentication.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -157,26 +169,7 @@ export default function LoginPage() {
           <Button 
             variant="outline" 
             className="w-full" 
-            onClick={async () => {
-              try {
-                const { data, error } = await supabase.auth.signInWithOAuth({
-                  provider: 'github',
-                  options: {
-                    redirectTo: window.location.origin + '/home'
-                  }
-                });
-                
-                if (error) {
-                  throw error;
-                }
-              } catch (error) {
-                toast({
-                  title: "GitHub sign-in",
-                  description: "Failed to initiate GitHub authentication.",
-                  variant: "destructive"
-                });
-              }
-            }}
+            onClick={handleGithubLogin}
             disabled={isLoading}
           >
             <Github className="mr-2 h-4 w-4" />
