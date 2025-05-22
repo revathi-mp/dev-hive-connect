@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { supabase } from "@/integrations/supabase/client";
 
 // Define validation schema
 const loginSchema = z.object({
@@ -17,13 +19,6 @@ const loginSchema = z.object({
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
-
-// Mock user database for demo purposes
-const MOCK_USERS = [
-  { email: "test@example.com", password: "password123" },
-  { email: "admin@devhive.com", password: "admin123" },
-  { email: "user@devhive.com", password: "user123" }
-];
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -41,26 +36,27 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      console.log("Login attempt:", data);
+      console.log("Login attempt:", data.email);
       
-      // Find user with matching email
-      const user = MOCK_USERS.find(user => user.email === data.email);
+      // Use Supabase authentication
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
       
-      // Case 1: If this is a known user, verify password
-      if (user) {
-        if (user.password === data.password) {
-          handleSuccessfulLogin(data.email);
-        } else {
-          handleFailedLogin("Incorrect password. Please try again.");
-        }
-      } 
-      // Case 2: For demo purposes, any valid email with password "password123" can login
-      else if (data.password === "password123") {
+      if (error) {
+        console.error("Supabase auth error:", error);
+        toast({
+          title: "Login failed",
+          description: error.message || "Invalid email or password. Please try again.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      if (authData.user) {
         handleSuccessfulLogin(data.email);
-      } 
-      // Case 3: All other combinations fail
-      else {
-        handleFailedLogin("Invalid email or password. Please try again.");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -85,15 +81,6 @@ export default function LoginPage() {
       navigate("/home");
       setIsLoading(false);
     }, 1000);
-  };
-
-  const handleFailedLogin = (message: string) => {
-    toast({
-      title: "Login failed",
-      description: message,
-      variant: "destructive",
-    });
-    setIsLoading(false);
   };
 
   return (
@@ -170,11 +157,25 @@ export default function LoginPage() {
           <Button 
             variant="outline" 
             className="w-full" 
-            onClick={() => {
-              toast({
-                title: "GitHub sign-in",
-                description: "GitHub authentication would be implemented here.",
-              });
+            onClick={async () => {
+              try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                  provider: 'github',
+                  options: {
+                    redirectTo: window.location.origin + '/home'
+                  }
+                });
+                
+                if (error) {
+                  throw error;
+                }
+              } catch (error) {
+                toast({
+                  title: "GitHub sign-in",
+                  description: "Failed to initiate GitHub authentication.",
+                  variant: "destructive"
+                });
+              }
             }}
             disabled={isLoading}
           >

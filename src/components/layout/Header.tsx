@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import {
   LogOut
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Header() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -24,12 +24,44 @@ export function Header() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if user is logged in from localStorage on component mount
+  // Check if user is logged in from Supabase session
   useEffect(() => {
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    const email = localStorage.getItem("userEmail") || "";
-    setIsLoggedIn(loggedIn);
-    setUserEmail(email);
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        setIsLoggedIn(true);
+        setUserEmail(session.user.email || "");
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userEmail", session.user.email || "");
+      } else {
+        // Check localStorage as fallback for existing users
+        const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+        const email = localStorage.getItem("userEmail") || "";
+        setIsLoggedIn(loggedIn);
+        setUserEmail(email);
+      }
+    };
+    
+    checkSession();
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setIsLoggedIn(true);
+        setUserEmail(session.user.email || "");
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userEmail", session.user.email || "");
+      } else if (event === 'SIGNED_OUT') {
+        setIsLoggedIn(false);
+        setUserEmail("");
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("userEmail");
+      }
+    });
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const toggleTheme = () => {
@@ -42,16 +74,26 @@ export function Header() {
     });
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserEmail("");
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userEmail");
-    toast({
-      title: "Logged Out",
-      description: "You have been logged out successfully.",
-    });
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setIsLoggedIn(false);
+      setUserEmail("");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userEmail");
+      toast({
+        title: "Logged Out",
+        description: "You have been logged out successfully.",
+      });
+      navigate("/");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleNotificationClick = () => {

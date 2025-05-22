@@ -6,6 +6,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, ArrowRight, MailCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -29,8 +30,14 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true);
     
     try {
-      // This is a mock API call - in a real app, you would call your backend
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Use Supabase for password reset
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+      
+      if (error) {
+        throw error;
+      }
       
       setEmailSent(true);
       toast({
@@ -38,35 +45,11 @@ export default function ForgotPasswordPage() {
         description: "Check your inbox for password reset instructions.",
       });
       
-      // In a real app, a real email would be sent.
-      // For demo purposes, we'll create a reset link with a fake token
-      // This allows us to demonstrate the reset flow
-      setTimeout(() => {
-        // Create demo reset link (this would normally come from backend)
-        const resetLink = `/reset-password?token=demo-token-12345&email=${encodeURIComponent(email)}`;
-        
-        toast({
-          title: "Demo mode",
-          description: (
-            <div className="flex flex-col gap-2">
-              <span>Since this is a demo, you can use this link to test the reset flow:</span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-1 w-fit"
-                onClick={() => navigate(resetLink)}
-              >
-                Try Reset Flow
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          ),
-        });
-      }, 2000);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Password reset error:", error);
       toast({
         title: "Something went wrong",
-        description: "Could not send reset email. Please try again later.",
+        description: error.message || "Could not send reset email. Please try again later.",
         variant: "destructive",
       });
     } finally {
