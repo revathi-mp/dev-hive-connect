@@ -15,7 +15,6 @@ import {
   LogOut
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { authService } from "@/services/supabaseService";
 
 export function Header() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -25,47 +24,12 @@ export function Header() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if user is logged in from Supabase session
+  // Check if user is logged in from localStorage
   useEffect(() => {
-    const checkSession = async () => {
-      const session = await authService.getCurrentSession();
-      
-      if (session) {
-        setIsLoggedIn(true);
-        setUserEmail(session.user.email || "");
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userEmail", session.user.email || "");
-      } else {
-        // Check localStorage as fallback for existing users
-        const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-        const email = localStorage.getItem("userEmail") || "";
-        setIsLoggedIn(loggedIn);
-        setUserEmail(email);
-      }
-    };
-    
-    checkSession();
-    
-    // Listen for auth state changes
-    const { data: authListener } = authService.onAuthStateChange((event: string, session: any) => {
-      if (event === 'SIGNED_IN' && session) {
-        setIsLoggedIn(true);
-        setUserEmail(session.user.email || "");
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userEmail", session.user.email || "");
-      } else if (event === 'SIGNED_OUT') {
-        setIsLoggedIn(false);
-        setUserEmail("");
-        localStorage.removeItem("isLoggedIn");
-        localStorage.removeItem("userEmail");
-      }
-    });
-    
-    return () => {
-      if (authListener && authListener.subscription) {
-        authListener.subscription.unsubscribe();
-      }
-    };
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const email = localStorage.getItem("userEmail") || "";
+    setIsLoggedIn(loggedIn);
+    setUserEmail(email);
   }, []);
 
   const toggleTheme = () => {
@@ -78,26 +42,16 @@ export function Header() {
     });
   };
 
-  const handleLogout = async () => {
-    try {
-      await authService.logout();
-      setIsLoggedIn(false);
-      setUserEmail("");
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("userEmail");
-      toast({
-        title: "Logged Out",
-        description: "You have been logged out successfully.",
-      });
-      navigate("/");
-    } catch (error) {
-      console.error("Error logging out:", error);
-      toast({
-        title: "Error",
-        description: "Failed to log out. Please try again.",
-        variant: "destructive"
-      });
-    }
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUserEmail("");
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("userEmail");
+    toast({
+      title: "Logged Out",
+      description: "You have been logged out successfully.",
+    });
+    navigate("/");
   };
 
   const handleNotificationClick = () => {
