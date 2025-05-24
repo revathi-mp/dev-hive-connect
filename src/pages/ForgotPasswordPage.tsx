@@ -6,7 +6,6 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, ArrowRight, MailCheck } from "lucide-react";
-import { authService } from "@/services/supabaseService";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -30,27 +29,23 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true);
     
     try {
-      // Use auth service for password reset
-      const { error } = await authService.resetPassword(email);
-      
-      if (error) {
-        throw error;
-      }
-      
-      setEmailSent(true);
-      toast({
-        title: "Reset email sent",
-        description: "Check your inbox for password reset instructions.",
-      });
+      // Simulate sending reset email
+      setTimeout(() => {
+        setEmailSent(true);
+        toast({
+          title: "Reset email sent",
+          description: "Check your inbox for password reset instructions.",
+        });
+        setIsSubmitting(false);
+      }, 1000);
       
     } catch (error: any) {
       console.error("Password reset error:", error);
       toast({
         title: "Something went wrong",
-        description: error.message || "Could not send reset email. Please try again later.",
+        description: "Could not send reset email. Please try again later.",
         variant: "destructive",
       });
-    } finally {
       setIsSubmitting(false);
     }
   };

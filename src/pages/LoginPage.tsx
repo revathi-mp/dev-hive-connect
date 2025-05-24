@@ -8,90 +8,44 @@ import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { authService } from "@/services/supabaseService";
-
-// Define validation schema
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm({
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (data: { email: string; password: string }) => {
     setIsLoading(true);
     try {
       console.log("Login attempt:", data.email);
       
-      // Use auth service for login
-      const { data: authData, error } = await authService.login(data.email, data.password);
-      
-      if (error) {
-        console.error("Supabase auth error:", error);
+      // Simulate successful login
+      setTimeout(() => {
         toast({
-          title: "Login failed",
-          description: error.message || "Invalid email or password. Please try again.",
-          variant: "destructive",
+          title: "Login successful",
+          description: "Welcome back to DevHive Connect!",
         });
+        // Store login state in localStorage
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userEmail", data.email);
+        navigate("/home");
         setIsLoading(false);
-        return;
-      }
-      
-      if (authData.user) {
-        handleSuccessfulLogin(data.email);
-      }
+      }, 1000);
     } catch (error) {
       console.error("Login error:", error);
       toast({
         title: "Login failed",
-        description: "An error occurred during login. Please try again.",
+        description: "Invalid email or password. Please try again.",
         variant: "destructive",
       });
       setIsLoading(false);
-    }
-  };
-
-  const handleSuccessfulLogin = (email: string) => {
-    setTimeout(() => {
-      toast({
-        title: "Login successful",
-        description: "Welcome back to DevHive Connect!",
-      });
-      // Store login state in localStorage
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userEmail", email);
-      navigate("/home");
-      setIsLoading(false);
-    }, 1000);
-  };
-
-  const handleGithubLogin = async () => {
-    try {
-      const { error } = await authService.signInWithGithub();
-      if (error) {
-        throw error;
-      }
-    } catch (error) {
-      toast({
-        title: "GitHub sign-in",
-        description: "Failed to initiate GitHub authentication.",
-        variant: "destructive"
-      });
     }
   };
 
@@ -169,7 +123,12 @@ export default function LoginPage() {
           <Button 
             variant="outline" 
             className="w-full" 
-            onClick={handleGithubLogin}
+            onClick={() => {
+              toast({
+                title: "GitHub sign-in",
+                description: "GitHub authentication would be implemented here.",
+              });
+            }}
             disabled={isLoading}
           >
             <Github className="mr-2 h-4 w-4" />
