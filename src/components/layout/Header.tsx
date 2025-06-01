@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -15,22 +15,14 @@ import {
   LogOut
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Header() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Check if user is logged in from localStorage
-  useEffect(() => {
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    const email = localStorage.getItem("userEmail") || "";
-    setIsLoggedIn(loggedIn);
-    setUserEmail(email);
-  }, []);
+  const { user, signOut, loading } = useAuth();
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -42,16 +34,22 @@ export function Header() {
     });
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserEmail("");
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userEmail");
-    toast({
-      title: "Logged Out",
-      description: "You have been logged out successfully.",
-    });
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged Out",
+        description: "You have been logged out successfully.",
+      });
+      navigate("/");
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Logout Error",
+        description: "There was an error logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleNotificationClick = () => {
@@ -64,13 +62,31 @@ export function Header() {
 
   // Generate initials from email
   const getInitials = (email: string) => {
-    if (!email) return "GU"; // Guest User
+    if (!email) return "GU";
     const parts = email.split('@');
     if (parts.length > 0) {
       return parts[0].substring(0, 2).toUpperCase();
     }
     return "GU";
   };
+
+  if (loading) {
+    return (
+      <header className="sticky top-0 z-40 border-b bg-background">
+        <div className="container flex h-16 items-center justify-between">
+          <div className="flex items-center gap-2 md:gap-4">
+            <Link to="/" className="flex items-center gap-2">
+              <Logo size="md" />
+              <span className="text-xl font-bold tracking-tight">DevHive Connect</span>
+            </Link>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 bg-muted rounded-full animate-pulse"></div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
@@ -118,7 +134,7 @@ export function Header() {
           </Button>
           <div className="hidden md:block">
             <div className="flex items-center gap-2">
-              {isLoggedIn ? (
+              {user ? (
                 <>
                   <Button variant="outline" size="sm" className="gap-1" onClick={handleLogout}>
                     <LogOut className="h-4 w-4" />
@@ -127,7 +143,7 @@ export function Header() {
                   <Button variant="ghost" size="icon" asChild>
                     <Link to="/profile">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback>{getInitials(userEmail)}</AvatarFallback>
+                        <AvatarFallback>{getInitials(user.email || "")}</AvatarFallback>
                       </Avatar>
                     </Link>
                   </Button>

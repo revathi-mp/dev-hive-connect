@@ -8,11 +8,13 @@ import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signUp } = useAuth();
   
   const form = useForm({
     defaultValues: {
@@ -33,22 +35,31 @@ export default function SignupPage() {
   }) => {
     setIsLoading(true);
     try {
-      // In a real app, this would connect to your registration service
-      console.log("Signup attempt:", data);
-      
-      // Simulate successful registration
-      setTimeout(() => {
+      const { error } = await signUp(data.email, data.password, {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        username: data.username,
+      });
+
+      if (error) {
+        console.error("Signup error:", error);
+        toast({
+          title: "Signup failed",
+          description: error.message || "Please check your information and try again.",
+          variant: "destructive",
+        });
+      } else {
         toast({
           title: "Account created successfully",
-          description: "Welcome to DevHive Connect!",
+          description: "Please check your email to verify your account.",
         });
         navigate("/home");
-      }, 1000);
+      }
     } catch (error) {
       console.error("Signup error:", error);
       toast({
         title: "Signup failed",
-        description: "Please check your information and try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {

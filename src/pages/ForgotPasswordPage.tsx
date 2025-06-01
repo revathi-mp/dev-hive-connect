@@ -1,18 +1,18 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, ArrowRight, MailCheck } from "lucide-react";
+import { Mail, MailCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,16 +29,24 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true);
     
     try {
-      // Simulate sending reset email
-      setTimeout(() => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        console.error("Password reset error:", error);
+        toast({
+          title: "Error",
+          description: error.message || "Could not send reset email. Please try again.",
+          variant: "destructive",
+        });
+      } else {
         setEmailSent(true);
         toast({
           title: "Reset email sent",
           description: "Check your inbox for password reset instructions.",
         });
-        setIsSubmitting(false);
-      }, 1000);
-      
+      }
     } catch (error: any) {
       console.error("Password reset error:", error);
       toast({
@@ -46,6 +54,7 @@ export default function ForgotPasswordPage() {
         description: "Could not send reset email. Please try again later.",
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
     }
   };

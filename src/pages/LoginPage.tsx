@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AuthLayout } from "@/components/auth/AuthLayout";
@@ -8,11 +8,13 @@ import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signIn, user } = useAuth();
   
   const form = useForm({
     defaultValues: {
@@ -21,30 +23,40 @@ export default function LoginPage() {
     },
   });
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/home");
+    }
+  }, [user, navigate]);
+
   const onSubmit = async (data: { email: string; password: string }) => {
     setIsLoading(true);
     try {
-      console.log("Login attempt:", data.email);
+      const { error } = await signIn(data.email, data.password);
       
-      // Simulate successful login
-      setTimeout(() => {
+      if (error) {
+        console.error("Login error:", error);
+        toast({
+          title: "Login failed",
+          description: error.message || "Invalid email or password. Please try again.",
+          variant: "destructive",
+        });
+      } else {
         toast({
           title: "Login successful",
           description: "Welcome back to DevHive Connect!",
         });
-        // Store login state in localStorage
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userEmail", data.email);
         navigate("/home");
-        setIsLoading(false);
-      }, 1000);
+      }
     } catch (error) {
       console.error("Login error:", error);
       toast({
         title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
   };
