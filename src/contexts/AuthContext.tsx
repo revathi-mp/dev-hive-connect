@@ -20,7 +20,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
+    console.log('Setting up auth state listener...');
+    
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
@@ -30,46 +32,123 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // THEN get initial session
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error getting session:', error);
+        } else {
+          console.log('Initial session:', session?.user?.email || 'No session');
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
+      } catch (error) {
+        console.error('Error in getSession:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => subscription.unsubscribe();
+    getInitialSession();
+
+    return () => {
+      console.log('Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, userData: { firstName: string; lastName: string; username: string }) => {
+    console.log('Attempting signup for:', email);
+    
+    // Use the current origin for redirect
     const redirectUrl = `${window.location.origin}/`;
+    console.log('Redirect URL:', redirectUrl);
     
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          first_name: userData.firstName,
-          last_name: userData.lastName,
-          username: userData.username,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+            username: userData.username,
+          }
         }
+      });
+      
+      if (error) {
+        console.error('Signup error:', error);
+        return { error };
       }
-    });
-    
-    return { error };
+      
+      console.log('Signup successful:', data);
+      
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        console.log('Email confirmation required for user:', data.user.email);
+        return { 
+          error: { 
+            message: 'Please check your email and click the confirmation link to complete registration.',
+            name: 'EmailConfirmationRequired'
+          } 
+        };
+      }
+      
+      return { error: null };
+    } catch (err) {
+      console.error('Unexpected signup error:', err);
+      return { error: err };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    console.log('Attempting signin for:', email);
     
-    return { error };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        console.error('Signin error:', error);
+        
+        // Provide more specific error messages
+        if (error.message.includes('Invalid login credentials')) {
+          return { 
+            error: { 
+              ...error,
+              message: 'Invalid email or password. Please check your credentials and try again. If you just signed up, make sure to confirm your email first.'
+            } 
+          };
+        }
+        
+        return { error };
+      }
+      
+      console.log('Signin successful for:', data.user?.email);
+      return { error: null };
+    } catch (err) {
+      console.error('Unexpected signin error:', err);
+      return { error: err };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    console.log('Signing out...');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Signout error:', error);
+      } else {
+        console.log('Signout successful');
+      }
+    } catch (err) {
+      console.error('Unexpected signout error:', err);
+    }
   };
 
   const value = {

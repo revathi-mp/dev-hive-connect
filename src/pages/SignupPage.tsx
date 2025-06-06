@@ -33,7 +33,18 @@ export default function SignupPage() {
     email: string;
     password: string;
   }) => {
+    if (!data.email || !data.password || !data.firstName || !data.lastName || !data.username) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
+    console.log('Signup form submitted for:', data.email);
+    
     try {
       const { error } = await signUp(data.email, data.password, {
         firstName: data.firstName,
@@ -43,22 +54,39 @@ export default function SignupPage() {
 
       if (error) {
         console.error("Signup error:", error);
+        
+        let errorMessage = "Please check your information and try again.";
+        
+        if (error.message) {
+          if (error.name === 'EmailConfirmationRequired') {
+            errorMessage = error.message;
+            toast({
+              title: "Check Your Email",
+              description: errorMessage,
+            });
+            // Don't redirect for email confirmation
+            return;
+          } else {
+            errorMessage = error.message;
+          }
+        }
+        
         toast({
-          title: "Signup failed",
-          description: error.message || "Please check your information and try again.",
+          title: "Signup Failed",
+          description: errorMessage,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Account created successfully",
-          description: "Please check your email to verify your account.",
+          title: "Account Created Successfully",
+          description: "Welcome to DevHive Connect!",
         });
         navigate("/home");
       }
     } catch (error) {
-      console.error("Signup error:", error);
+      console.error("Unexpected signup error:", error);
       toast({
-        title: "Signup failed",
+        title: "Signup Failed",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
@@ -79,6 +107,7 @@ export default function SignupPage() {
               <FormField
                 control={form.control}
                 name="firstName"
+                rules={{ required: "First name is required" }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel htmlFor="first-name">First name</FormLabel>
@@ -97,6 +126,7 @@ export default function SignupPage() {
               <FormField
                 control={form.control}
                 name="lastName"
+                rules={{ required: "Last name is required" }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel htmlFor="last-name">Last name</FormLabel>
@@ -116,6 +146,13 @@ export default function SignupPage() {
             <FormField
               control={form.control}
               name="username"
+              rules={{ 
+                required: "Username is required",
+                minLength: {
+                  value: 3,
+                  message: "Username must be at least 3 characters"
+                }
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="username">Username</FormLabel>
@@ -134,6 +171,13 @@ export default function SignupPage() {
             <FormField
               control={form.control}
               name="email"
+              rules={{ 
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Please enter a valid email address"
+                }
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="email">Email</FormLabel>
@@ -154,6 +198,13 @@ export default function SignupPage() {
             <FormField
               control={form.control}
               name="password"
+              rules={{ 
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Password must be at least 6 characters"
+                }
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="password">Password</FormLabel>
@@ -175,6 +226,13 @@ export default function SignupPage() {
             </Button>
           </form>
         </Form>
+        
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground mb-4">
+            You may need to confirm your email address before you can log in.
+          </p>
+        </div>
+
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />

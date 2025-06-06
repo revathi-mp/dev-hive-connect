@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { signIn, user } = useAuth();
+  const { signIn, user, loading } = useAuth();
   
   const form = useForm({
     defaultValues: {
@@ -25,34 +25,58 @@ export default function LoginPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user) {
+    if (!loading && user) {
+      console.log('User already logged in, redirecting to home');
       navigate("/home");
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   const onSubmit = async (data: { email: string; password: string }) => {
+    if (!data.email || !data.password) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter both email and password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
+    console.log('Login form submitted for:', data.email);
+    
     try {
       const { error } = await signIn(data.email, data.password);
       
       if (error) {
         console.error("Login error:", error);
+        
+        let errorMessage = "An error occurred during login. Please try again.";
+        
+        if (error.message) {
+          errorMessage = error.message;
+        }
+        
         toast({
-          title: "Login failed",
-          description: error.message || "Invalid email or password. Please try again.",
+          title: "Login Failed",
+          description: errorMessage,
           variant: "destructive",
         });
       } else {
+        console.log('Login successful, showing success toast');
         toast({
-          title: "Login successful",
+          title: "Login Successful",
           description: "Welcome back to DevHive Connect!",
         });
-        navigate("/home");
+        
+        // Small delay to ensure auth state is updated
+        setTimeout(() => {
+          navigate("/home");
+        }, 100);
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Unexpected login error:", error);
       toast({
-        title: "Login failed",
+        title: "Login Failed",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
@@ -60,6 +84,20 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <AuthLayout
+        title="Loading..."
+        description="Checking authentication status"
+      >
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout
@@ -72,6 +110,13 @@ export default function LoginPage() {
             <FormField
               control={form.control}
               name="email"
+              rules={{ 
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Please enter a valid email address"
+                }
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="email">Email</FormLabel>
@@ -92,6 +137,13 @@ export default function LoginPage() {
             <FormField
               control={form.control}
               name="password"
+              rules={{ 
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Password must be at least 6 characters"
+                }
+              }}
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center justify-between">
@@ -121,6 +173,13 @@ export default function LoginPage() {
             </Button>
           </form>
         </Form>
+        
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground mb-4">
+            If you're having trouble logging in, make sure you've confirmed your email address.
+          </p>
+        </div>
+
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
