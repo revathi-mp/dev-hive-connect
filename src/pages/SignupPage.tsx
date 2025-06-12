@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,9 +8,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isResendingConfirmation, setIsResendingConfirmation] = useState(false);
+  const [showResendOption, setShowResendOption] = useState(false);
+  const [existingEmail, setExistingEmail] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
   const { signUp } = useAuth();
@@ -25,6 +28,47 @@ export default function SignupPage() {
       password: "",
     },
   });
+
+  const resendConfirmationEmail = async (email: string) => {
+    setIsResendingConfirmation(true);
+    console.log('Resending confirmation email for:', email);
+    
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: redirectUrl
+        }
+      });
+
+      if (error) {
+        console.error('Resend confirmation error:', error);
+        toast({
+          title: "Failed to Resend",
+          description: error.message || "Could not resend confirmation email. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Confirmation Email Sent",
+          description: "Please check your email for the confirmation link.",
+        });
+        setShowResendOption(false);
+      }
+    } catch (error) {
+      console.error('Unexpected resend error:', error);
+      toast({
+        title: "Failed to Resend",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResendingConfirmation(false);
+    }
+  };
 
   const onSubmit = async (data: {
     firstName: string;
@@ -43,6 +87,7 @@ export default function SignupPage() {
     }
 
     setIsLoading(true);
+    setShowResendOption(false);
     console.log('Signup form submitted for:', data.email);
     
     try {
@@ -64,7 +109,16 @@ export default function SignupPage() {
               title: "Check Your Email",
               description: errorMessage,
             });
-            // Don't redirect for email confirmation
+            return;
+          } else if (error.message.includes('User already registered')) {
+            // Handle existing user case
+            setExistingEmail(data.email);
+            setShowResendOption(true);
+            toast({
+              title: "Account Already Exists",
+              description: "An account with this email already exists. You can resend the confirmation email if needed.",
+              variant: "destructive",
+            });
             return;
           } else {
             errorMessage = error.message;
@@ -101,6 +155,32 @@ export default function SignupPage() {
       description="Enter your details to create a new account"
     >
       <div className="grid gap-6">
+        {showResendOption && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 className="font-medium text-blue-900 mb-2">Account Already Exists</h3>
+            <p className="text-sm text-blue-700 mb-3">
+              An account with email <strong>{existingEmail}</strong> already exists. 
+              If you haven't received your confirmation email, you can resend it.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={() => resendConfirmationEmail(existingEmail)}
+                disabled={isResendingConfirmation}
+              >
+                {isResendingConfirmation ? "Sending..." : "Resend Confirmation Email"}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                asChild
+              >
+                <Link to="/login">Go to Login</Link>
+              </Button>
+            </div>
+          </div>
+        )}
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
