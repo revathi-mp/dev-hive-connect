@@ -7,41 +7,52 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Lock, Shield, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
-  const email = searchParams.get("email");
   const navigate = useNavigate();
   const { toast } = useToast();
   
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [tokenValid, setTokenValid] = useState<boolean | null>(null);
+  const [sessionValid, setSessionValid] = useState<boolean | null>(null);
   const [passwordStrength, setPasswordStrength] = useState<"weak" | "medium" | "strong" | null>(null);
 
   useEffect(() => {
-    // Verify token when component mounts
-    const verifyToken = async () => {
-      if (!token || !email) {
-        setTokenValid(false);
-        return;
-      }
-
-      // In a real app, this would be an API call to verify the token
-      // For demo purposes, we'll simulate a valid token check
+    // Check if we have a valid session for password reset
+    const checkSession = async () => {
       try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // Simulate token validation (any token with email for demo)
-        setTokenValid(!!token && !!email);
+        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('Reset password session check:', session, error);
+        
+        if (error) {
+          console.error('Session check error:', error);
+          setSessionValid(false);
+          return;
+        }
+        
+        // For password reset, we need either:
+        // 1. A valid session from the reset link
+        // 2. URL parameters indicating a reset flow
+        const accessToken = searchParams.get('access_token');
+        const refreshToken = searchParams.get('refresh_token');
+        const type = searchParams.get('type');
+        
+        if (session || (accessToken && type === 'recovery')) {
+          setSessionValid(true);
+        } else {
+          setSessionValid(false);
+        }
       } catch (error) {
-        setTokenValid(false);
+        console.error('Error checking session:', error);
+        setSessionValid(false);
       }
     };
 
-    verifyToken();
-  }, [token, email]);
+    checkSession();
+  }, [searchParams]);
 
   // Check password strength
   useEffect(() => {
@@ -97,7 +108,7 @@ export default function ResetPasswordPage() {
     if (passwordStrength === "weak") {
       toast({
         title: "Weak password",
-        description: "Please choose a stronger password.",
+        description: "Please choose a stronger password for better security.",
         variant: "destructive",
       });
       return;
@@ -106,12 +117,27 @@ export default function ResetPasswordPage() {
     setIsSubmitting(true);
     
     try {
-      // This is a mock API call - in a real app, you would call your backend
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('Attempting to update password...');
+      
+      const { data, error } = await supabase.auth.updateUser({
+        password: password
+      });
+      
+      if (error) {
+        console.error('Password update error:', error);
+        toast({
+          title: "Password reset failed",
+          description: error.message || "Could not reset your password. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      console.log('Password updated successfully:', data);
       
       toast({
         title: "Password reset successful",
-        description: "Your password has been updated. You can now log in.",
+        description: "Your password has been updated. You can now log in with your new password.",
       });
       
       // Redirect to login page after successful password reset
@@ -119,10 +145,11 @@ export default function ResetPasswordPage() {
         navigate("/login");
       }, 1500);
       
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Unexpected password reset error:', error);
       toast({
         title: "Something went wrong",
-        description: "Could not reset your password. Please try again later.",
+        description: "Could not reset your password. Please try the forgot password process again.",
         variant: "destructive",
       });
     } finally {
@@ -130,31 +157,23 @@ export default function ResetPasswordPage() {
     }
   };
 
-  // Show loading state while verifying token
-  if (tokenValid === null) {
+  // Show loading state while verifying session
+  if (sessionValid === null) {
     return (
       <AuthLayout
         title="Reset password"
         description="Verifying your reset link..."
       >
         <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="animate-pulse flex space-x-4">
-            <div className="h-12 w-12 rounded-full bg-muted"></div>
-            <div className="flex-1 space-y-4 py-1">
-              <div className="h-4 bg-muted rounded w-3/4"></div>
-              <div className="space-y-2">
-                <div className="h-4 bg-muted rounded"></div>
-                <div className="h-4 bg-muted rounded w-5/6"></div>
-              </div>
-            </div>
-          </div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="text-sm text-muted-foreground">Checking reset authorization...</p>
         </div>
       </AuthLayout>
     );
   }
 
-  // Show error if token is invalid
-  if (tokenValid === false) {
+  // Show error if session is invalid
+  if (sessionValid === false) {
     return (
       <AuthLayout
         title="Invalid reset link"
@@ -191,11 +210,11 @@ export default function ResetPasswordPage() {
     );
   }
 
-  // Show password reset form if token is valid
+  // Show password reset form if session is valid
   return (
     <AuthLayout
       title="Reset password"
-      description={`Create a new password for ${email}`}
+      description="Create a new password for your account"
     >
       <div className="grid gap-6">
         <form onSubmit={handleSubmit}>
