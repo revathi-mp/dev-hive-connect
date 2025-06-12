@@ -21,37 +21,55 @@ export default function ResetPasswordPage() {
   const [passwordStrength, setPasswordStrength] = useState<"weak" | "medium" | "strong" | null>(null);
 
   useEffect(() => {
-    // Check if we have a valid session for password reset
-    const checkSession = async () => {
+    const checkResetSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        console.log('Reset password session check:', session, error);
-        
-        if (error) {
-          console.error('Session check error:', error);
-          setSessionValid(false);
-          return;
-        }
-        
-        // For password reset, we need either:
-        // 1. A valid session from the reset link
-        // 2. URL parameters indicating a reset flow
+        // Check URL parameters first
         const accessToken = searchParams.get('access_token');
         const refreshToken = searchParams.get('refresh_token');
         const type = searchParams.get('type');
         
-        if (session || (accessToken && type === 'recovery')) {
+        console.log('Reset URL params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
+        
+        if (accessToken && refreshToken && type === 'recovery') {
+          // Set the session using the tokens from URL
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
+          if (error) {
+            console.error('Error setting session:', error);
+            setSessionValid(false);
+            return;
+          }
+          
+          console.log('Session set successfully:', data);
           setSessionValid(true);
         } else {
-          setSessionValid(false);
+          // Check if we already have a valid session
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error('Error getting session:', error);
+            setSessionValid(false);
+            return;
+          }
+          
+          if (session) {
+            console.log('Valid session found');
+            setSessionValid(true);
+          } else {
+            console.log('No valid session');
+            setSessionValid(false);
+          }
         }
       } catch (error) {
-        console.error('Error checking session:', error);
+        console.error('Error in reset session check:', error);
         setSessionValid(false);
       }
     };
 
-    checkSession();
+    checkResetSession();
   }, [searchParams]);
 
   // Check password strength
