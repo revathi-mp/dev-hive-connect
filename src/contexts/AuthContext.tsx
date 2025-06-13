@@ -24,10 +24,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Check if user is approved
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('approved')
+            .eq('id', session.user.id)
+            .single();
+
+          if (error) {
+            console.error('Error checking user approval:', error);
+            setSession(session);
+            setUser(session.user);
+          } else if (!profile?.approved) {
+            console.log('User is not approved yet');
+            // Sign out unapproved users
+            await supabase.auth.signOut();
+            setSession(null);
+            setUser(null);
+          } else {
+            console.log('User is approved');
+            setSession(session);
+            setUser(session.user);
+          }
+        } else {
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
         setLoading(false);
       }
     );
@@ -40,8 +66,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('Error getting session:', error);
         } else {
           console.log('Initial session:', session?.user?.email || 'No session');
-          setSession(session);
-          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            // Check if user is approved
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('approved')
+              .eq('id', session.user.id)
+              .single();
+
+            if (profileError) {
+              console.error('Error checking user approval:', profileError);
+              setSession(session);
+              setUser(session.user);
+            } else if (!profile?.approved) {
+              console.log('Initial session user is not approved');
+              await supabase.auth.signOut();
+              setSession(null);
+              setUser(null);
+            } else {
+              setSession(session);
+              setUser(session.user);
+            }
+          } else {
+            setSession(session);
+            setUser(session?.user ?? null);
+          }
         }
       } catch (error) {
         console.error('Error in getSession:', error);
@@ -91,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('Email confirmation required for user:', data.user.email);
         return { 
           error: { 
-            message: 'Please check your email and click the confirmation link to complete registration.',
+            message: 'Please check your email and click the confirmation link. After email confirmation, your account will need admin approval before you can access the forum.',
             name: 'EmailConfirmationRequired'
           } 
         };

@@ -106,7 +106,7 @@ export default function SignupPage() {
           if (error.name === 'EmailConfirmationRequired') {
             errorMessage = error.message;
             toast({
-              title: "Check Your Email",
+              title: "Account Created - Awaiting Approval",
               description: errorMessage,
             });
             return;
@@ -132,10 +132,10 @@ export default function SignupPage() {
         });
       } else {
         toast({
-          title: "Account Created Successfully",
-          description: "Welcome to DevHive Connect!",
+          title: "Account Created - Awaiting Approval",
+          description: "Your account has been created. Please wait for admin approval before you can access the forum.",
         });
-        navigate("/home");
+        navigate("/login");
       }
     } catch (error) {
       console.error("Unexpected signup error:", error);
@@ -155,6 +155,15 @@ export default function SignupPage() {
       description="Enter your details to create a new account"
     >
       <div className="grid gap-6">
+        {/* Approval notice */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="font-medium text-blue-900 mb-2">Account Approval Required</h3>
+          <p className="text-sm text-blue-700">
+            New accounts require admin approval before you can access the forum. 
+            You'll be notified once your account is approved.
+          </p>
+        </div>
+
         {showResendOption && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h3 className="font-medium text-blue-900 mb-2">Account Already Exists</h3>
@@ -309,7 +318,7 @@ export default function SignupPage() {
         
         <div className="text-center">
           <p className="text-sm text-muted-foreground mb-4">
-            You may need to confirm your email address before you can log in.
+            After creating your account, please confirm your email and wait for admin approval.
           </p>
         </div>
 
