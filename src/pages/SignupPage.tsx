@@ -105,7 +105,6 @@ export default function SignupPage() {
         
         if (result.error.message) {
           if (result.error.message.includes('User already registered')) {
-            // Handle existing user case
             setExistingEmail(data.email);
             setShowResendOption(true);
             toast({
