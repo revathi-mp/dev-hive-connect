@@ -71,7 +71,7 @@ export default function HomePage() {
     setViewAllPosts(false);
   };
 
-  // Show admin login panel when not logged in
+  // Show login panel when not logged in
   if (!user) {
     return (
       <MainLayout>

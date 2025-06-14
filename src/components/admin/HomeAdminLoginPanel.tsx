@@ -10,10 +10,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Designated admin email - only this email can access admin panel
-const ADMIN_EMAIL = "revathimp69@gmail.com";
-const ADMIN_PASSWORD = "password123";
-
 export function HomeAdminLoginPanel() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -38,41 +34,30 @@ export function HomeAdminLoginPanel() {
       return;
     }
 
-    // Check if the email and password match the designated admin credentials
-    if (data.email !== ADMIN_EMAIL || data.password !== ADMIN_PASSWORD) {
-      toast({
-        title: "Invalid Admin Credentials",
-        description: "Invalid email or password for admin access.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
-    console.log('Admin login attempt from home page for:', data.email);
+    console.log('Login attempt from home page for:', data.email);
     
     try {
       const { error } = await signIn(data.email, data.password);
       
       if (error) {
-        console.error("Admin login error:", error);
+        console.error("Login error:", error);
         toast({
           title: "Invalid Credentials",
           description: "Invalid email or password.",
           variant: "destructive",
         });
       } else {
-        console.log('Admin login successful from home page');
+        console.log('Login successful from home page');
         toast({
-          title: "Admin Login Successful",
-          description: "Welcome to the admin panel!",
+          title: "Login Successful",
+          description: "Welcome back!",
         });
         
-        // Navigate directly to admin panel
-        navigate("/admin");
+        navigate("/");
       }
     } catch (error) {
-      console.error("Unexpected admin login error:", error);
+      console.error("Unexpected login error:", error);
       toast({
         title: "Invalid Credentials",
         description: "Invalid email or password.",
@@ -88,10 +73,10 @@ export function HomeAdminLoginPanel() {
       <CardHeader className="space-y-1">
         <CardTitle className="flex items-center gap-2 text-xl">
           <Shield className="h-5 w-5 text-blue-600" />
-          Admin Access
+          Login
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Enter administrator credentials to access the admin panel
+          Enter your credentials to access the platform
         </p>
       </CardHeader>
       <CardContent>
@@ -101,7 +86,7 @@ export function HomeAdminLoginPanel() {
               control={form.control}
               name="email"
               rules={{ 
-                required: "Admin email is required",
+                required: "Email is required",
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                   message: "Please enter a valid email address"
@@ -109,11 +94,11 @@ export function HomeAdminLoginPanel() {
               }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="admin-email">Admin Email</FormLabel>
+                  <FormLabel htmlFor="email">Email</FormLabel>
                   <FormControl>
                     <Input 
-                      id="admin-email" 
-                      placeholder="Enter admin email" 
+                      id="email" 
+                      placeholder="Enter your email" 
                       type="email" 
                       autoComplete="email"
                       disabled={isLoading}
@@ -129,7 +114,7 @@ export function HomeAdminLoginPanel() {
               control={form.control}
               name="password"
               rules={{ 
-                required: "Admin password is required",
+                required: "Password is required",
                 minLength: {
                   value: 6,
                   message: "Password must be at least 6 characters"
@@ -137,13 +122,13 @@ export function HomeAdminLoginPanel() {
               }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="admin-password">Admin Password</FormLabel>
+                  <FormLabel htmlFor="password">Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input 
-                        id="admin-password" 
+                        id="password" 
                         type={showPassword ? "text" : "password"}
-                        placeholder="Enter admin password"
+                        placeholder="Enter your password"
                         autoComplete="current-password"
                         disabled={isLoading}
                         className="border-blue-200 focus:border-blue-500 pr-10"
@@ -172,12 +157,12 @@ export function HomeAdminLoginPanel() {
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Authenticating...
+                  Signing in...
                 </>
               ) : (
                 <>
                   <Shield className="mr-2 h-4 w-4" />
-                  Access Admin Panel
+                  Sign In
                 </>
               )}
             </Button>
@@ -186,10 +171,10 @@ export function HomeAdminLoginPanel() {
         
         <div className="mt-6 text-center border-t pt-4">
           <p className="text-sm text-muted-foreground mb-3">
-            Are you a forum user?
+            Don't have an account?
           </p>
-          <Button variant="outline" className="w-full" onClick={() => navigate("/login")}>
-            Go to User Login
+          <Button variant="outline" className="w-full" onClick={() => navigate("/signup")}>
+            Create Account
           </Button>
         </div>
       </CardContent>

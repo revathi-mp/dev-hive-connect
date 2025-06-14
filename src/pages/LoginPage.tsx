@@ -3,15 +3,12 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import { Github, Users } from "lucide-react";
+import { Github } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useAuth } from "@/contexts/AuthContext";
-
-// Designated admin email - prevent admin from using user login
-const ADMIN_EMAIL = "revathimp69@gmail.com";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -44,24 +41,14 @@ export default function LoginPage() {
       return;
     }
 
-    // Prevent admin from logging in through user login
-    if (data.email === ADMIN_EMAIL) {
-      toast({
-        title: "Access Denied",
-        description: "Admin users cannot login through the user portal. Please use the admin login on the home page.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
-    console.log('User login form submitted for:', data.email);
+    console.log('Login form submitted for:', data.email);
     
     try {
       const { error } = await signIn(data.email, data.password);
       
       if (error) {
-        console.error("User login error:", error);
+        console.error("Login error:", error);
         
         let errorMessage = "Login failed. Please check your credentials.";
         
@@ -75,14 +62,14 @@ export default function LoginPage() {
           variant: "destructive",
         });
       } else {
-        console.log('User login successful, redirecting to home');
+        console.log('Login successful, redirecting to home');
         toast({
           title: "Login Successful!",
           description: "Welcome to DevHive Connect!",
         });
       }
     } catch (error) {
-      console.error("Unexpected user login error:", error);
+      console.error("Unexpected login error:", error);
       toast({
         title: "Login Failed",
         description: "An unexpected error occurred. Please try again.",
@@ -110,16 +97,9 @@ export default function LoginPage() {
   return (
     <AuthLayout
       title="Welcome back to the community"
-      description="Sign in to your forum account to join the discussion"
+      description="Sign in to your account to join the discussion"
     >
       <div className="grid gap-6">
-        <div className="flex items-center justify-center gap-2 p-3 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
-          <Users className="h-4 w-4 text-green-600" />
-          <span className="text-sm font-medium text-green-700 dark:text-green-300">
-            Forum User Login
-          </span>
-        </div>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <FormField
@@ -184,7 +164,7 @@ export default function LoginPage() {
               )}
             />
             <Button className="w-full" type="submit" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign In to Forum"}
+              {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
         </Form>
@@ -216,24 +196,14 @@ export default function LoginPage() {
           </Button>
         </div>
         
-        <div className="text-center text-sm border-t pt-4 space-y-2">
-          <div>
-            Don&apos;t have an account?{" "}
-            <Link
-              to="/signup"
-              className="font-medium text-primary underline-offset-4 hover:underline"
-            >
-              Sign up for forum
-            </Link>
-          </div>
-          <div className="mt-3 pt-3 border-t">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 underline-offset-4 hover:underline"
-            >
-              ← Back to Home (Admin Login)
-            </Link>
-          </div>
+        <div className="text-center text-sm">
+          Don&apos;t have an account?{" "}
+          <Link
+            to="/signup"
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Sign up
+          </Link>
         </div>
       </div>
     </AuthLayout>

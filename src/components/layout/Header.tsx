@@ -12,19 +12,16 @@ import {
   User,
   Moon,
   Sun,
-  LogOut,
-  Shield
+  LogOut
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAdminCheck } from "@/hooks/useAdminCheck";
 
 export function Header() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, signOut, loading } = useAuth();
-  const { data: isAdmin } = useAdminCheck();
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -77,7 +74,7 @@ export function Header() {
           </Link>
         </div>
         
-        {user && !isAdmin && (
+        {user && (
           <div className="hidden md:flex md:flex-1 md:items-center md:justify-end md:gap-4">
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -100,46 +97,31 @@ export function Header() {
             <span className="sr-only">Toggle theme</span>
           </Button>
           
-          {user && !isAdmin && <NotificationDropdown />}
+          {user && <NotificationDropdown />}
           
           <div className="flex items-center gap-2">
             {loading ? (
               <div className="h-8 w-8 bg-muted rounded-full animate-pulse"></div>
             ) : user ? (
               <>
-                {isAdmin ? (
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 rounded-md">
-                      <Shield className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-700">Admin</span>
-                    </div>
-                    <Button variant="outline" size="sm" className="gap-1" onClick={handleLogout}>
-                      <LogOut className="h-4 w-4" />
-                      Admin Logout
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <Button variant="outline" size="sm" className="gap-1 hidden md:flex" onClick={handleLogout}>
-                      <LogOut className="h-4 w-4" />
-                      Logout
-                    </Button>
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link to="/profile">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>{getInitials(user.email || "")}</AvatarFallback>
-                        </Avatar>
-                      </Link>
-                    </Button>
-                  </>
-                )}
+                <Button variant="outline" size="sm" className="gap-1 hidden md:flex" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+                <Button variant="ghost" size="icon" asChild>
+                  <Link to="/profile">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>{getInitials(user.email || "")}</AvatarFallback>
+                    </Avatar>
+                  </Link>
+                </Button>
               </>
             ) : (
               <>
                 <Button variant="outline" size="sm" className="gap-1" asChild>
                   <Link to="/login">
                     <LogIn className="h-4 w-4" />
-                    User Login
+                    Login
                   </Link>
                 </Button>
                 <Button size="sm" className="gap-1" asChild>
