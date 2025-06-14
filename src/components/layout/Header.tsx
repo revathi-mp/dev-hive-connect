@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Logo } from "@/components/ui/Logo";
@@ -12,21 +12,17 @@ import {
   User,
   Moon,
   Sun,
-  LogOut,
-  Shield
+  LogOut
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAdminCheck } from "@/hooks/useAdminCheck";
 
 export function Header() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
   const { user, signOut, loading } = useAuth();
-  const { data: isAdmin } = useAdminCheck();
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -64,7 +60,6 @@ export function Header() {
     });
   };
 
-  // Generate initials from email
   const getInitials = (email: string) => {
     if (!email) return "GU";
     const parts = email.split('@');
@@ -88,30 +83,34 @@ export function Header() {
           </Link>
         </div>
         
-        <div className="hidden md:flex md:flex-1 md:items-center md:justify-end md:gap-4">
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <input
-              type="search"
-              placeholder="Search discussions..."
-              className="w-full rounded-md border border-input bg-background py-2 pl-8 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
+        {user && (
+          <div className="hidden md:flex md:flex-1 md:items-center md:justify-end md:gap-4">
+            <div className="relative w-full max-w-sm">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <input
+                type="search"
+                placeholder="Search discussions..."
+                className="w-full rounded-md border border-input bg-background py-2 pl-8 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </div>
           </div>
-        </div>
+        )}
         
         <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleNotificationClick}
-            className="relative"
-          >
-            <Bell className="h-5 w-5" />
-            {hasUnreadNotifications && (
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"></span>
-            )}
-            <span className="sr-only">Notifications</span>
-          </Button>
+          {user && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleNotificationClick}
+              className="relative"
+            >
+              <Bell className="h-5 w-5" />
+              {hasUnreadNotifications && (
+                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"></span>
+              )}
+              <span className="sr-only">Notifications</span>
+            </Button>
+          )}
           
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
             {theme === 'light' ? (
@@ -127,14 +126,6 @@ export function Header() {
               <div className="h-8 w-8 bg-muted rounded-full animate-pulse"></div>
             ) : user ? (
               <>
-                {isAdmin && (
-                  <Button variant="outline" size="sm" className="gap-1 hidden md:flex" asChild>
-                    <Link to="/admin">
-                      <Shield className="h-4 w-4" />
-                      Admin Panel
-                    </Link>
-                  </Button>
-                )}
                 <Button variant="outline" size="sm" className="gap-1 hidden md:flex" onClick={handleLogout}>
                   <LogOut className="h-4 w-4" />
                   Logout

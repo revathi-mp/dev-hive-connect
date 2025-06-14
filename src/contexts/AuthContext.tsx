@@ -1,15 +1,24 @@
 
 import React, { createContext, useContext } from 'react';
-import { AuthContextType, SignUpData } from '@/types/auth';
+import { User, Session } from '@supabase/supabase-js';
 import { useAuthState } from '@/hooks/useAuthState';
 import { signUpUser, signInUser, signOutUser } from '@/services/authService';
+
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+  signUp: (email: string, password: string, userData: any) => Promise<any>;
+  signIn: (email: string, password: string) => Promise<any>;
+  signOut: () => Promise<void>;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { user, session, loading, isApproved } = useAuthState();
+  const { user, session, loading } = useAuthState();
 
-  const signUp = async (email: string, password: string, userData: SignUpData) => {
+  const signUp = async (email: string, password: string, userData: any) => {
     return await signUpUser(email, password, userData);
   };
 
@@ -25,7 +34,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     session,
     loading,
-    isApproved,
     signUp,
     signIn,
     signOut,

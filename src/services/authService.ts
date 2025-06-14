@@ -1,42 +1,9 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { SignUpData } from '@/types/auth';
 
-export const checkUserApproval = async (userId: string): Promise<boolean> => {
-  // Check if user is admin first
-  const { data: adminRole, error: adminError } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId)
-    .eq('role', 'admin')
-    .single();
-
-  if (!adminError && adminRole) {
-    console.log('User is admin, allowing access');
-    return true;
-  }
-
-  // If not admin, check if user is approved
-  const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('approved')
-    .eq('id', userId)
-    .single();
-
-  if (error) {
-    console.error('Error checking user approval:', error);
-    return false;
-  }
-
-  const approved = profile?.approved || false;
-  console.log('User approval status:', approved);
-  return approved;
-};
-
-export const signUpUser = async (email: string, password: string, userData: SignUpData) => {
+export const signUpUser = async (email: string, password: string, userData: any) => {
   console.log('Attempting signup for:', email);
   
-  // Use the current origin for redirect
   const redirectUrl = `${window.location.origin}/`;
   console.log('Redirect URL:', redirectUrl);
   
@@ -61,12 +28,11 @@ export const signUpUser = async (email: string, password: string, userData: Sign
     
     console.log('Signup successful:', data);
     
-    // Check if email confirmation is required
     if (data.user && !data.session) {
       console.log('Email confirmation required for user:', data.user.email);
       return { 
         error: { 
-          message: 'Please check your email and click the confirmation link. After email confirmation, your account will need admin approval before you can access the forum.',
+          message: 'Please check your email and click the confirmation link to complete your registration.',
           name: 'EmailConfirmationRequired'
         } 
       };
@@ -91,12 +57,11 @@ export const signInUser = async (email: string, password: string) => {
     if (error) {
       console.error('Signin error:', error);
       
-      // Provide more specific error messages
       if (error.message.includes('Invalid login credentials')) {
         return { 
           error: { 
             ...error,
-            message: 'Invalid email or password. Please check your credentials and try again. If you just signed up, make sure to confirm your email first.'
+            message: 'Invalid email or password. Please check your credentials and try again.'
           } 
         };
       }
