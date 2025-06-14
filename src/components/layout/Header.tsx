@@ -88,8 +88,6 @@ export function Header() {
         )}
         
         <div className="flex items-center gap-2">
-          {user && <NotificationDropdown />}
-          
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
             {theme === 'light' ? (
               <Moon className="h-5 w-5" />
@@ -98,6 +96,8 @@ export function Header() {
             )}
             <span className="sr-only">Toggle theme</span>
           </Button>
+          
+          {user && <NotificationDropdown />}
           
           <div className="flex items-center gap-2">
             {loading ? (
