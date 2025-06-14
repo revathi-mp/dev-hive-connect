@@ -53,8 +53,8 @@ export default function AdminLoginPage() {
     // Check if the email is the designated admin email
     if (data.email !== ADMIN_EMAIL) {
       toast({
-        title: "Access Denied",
-        description: "Only authorized administrators can access this panel.",
+        title: "Invalid Credentials",
+        description: "Invalid email or password.",
         variant: "destructive",
       });
       return;
@@ -69,15 +69,9 @@ export default function AdminLoginPage() {
       if (error) {
         console.error("Admin login error:", error);
         
-        let errorMessage = "Invalid admin credentials. Please check your email and password.";
-        
-        if (error.message) {
-          errorMessage = error.message;
-        }
-        
         toast({
-          title: "Admin Login Failed",
-          description: errorMessage,
+          title: "Invalid Credentials",
+          description: "Invalid email or password.",
           variant: "destructive",
         });
       } else {
@@ -93,8 +87,8 @@ export default function AdminLoginPage() {
     } catch (error) {
       console.error("Unexpected admin login error:", error);
       toast({
-        title: "Admin Login Failed",
-        description: "An unexpected error occurred. Please try again.",
+        title: "Invalid Credentials",
+        description: "Invalid email or password.",
         variant: "destructive",
       });
     } finally {
@@ -129,14 +123,6 @@ export default function AdminLoginPage() {
           </span>
         </div>
 
-        <div className="p-4 bg-amber-50 dark:bg-amber-950 rounded-lg border border-amber-200 dark:border-amber-800">
-          <p className="text-sm text-amber-700 dark:text-amber-300">
-            <strong>Admin Credentials:</strong><br />
-            Email: admin@devhive.com<br />
-            Password: admin123
-          </p>
-        </div>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <FormField
@@ -155,7 +141,7 @@ export default function AdminLoginPage() {
                   <FormControl>
                     <Input 
                       id="admin-email" 
-                      placeholder="admin@devhive.com" 
+                      placeholder="Enter admin email" 
                       type="email" 
                       autoComplete="email"
                       disabled={isLoading}
@@ -185,6 +171,7 @@ export default function AdminLoginPage() {
                       <Input 
                         id="admin-password" 
                         type={showPassword ? "text" : "password"}
+                        placeholder="Enter admin password"
                         autoComplete="current-password"
                         disabled={isLoading}
                         className="border-blue-200 focus:border-blue-500 pr-10"
