@@ -10,7 +10,6 @@ import { Plus, Code, FileCode, Settings, BookOpen, Bell, Users, Search } from "l
 import { Input } from "@/components/ui/input";
 import { NewPostModal } from "@/components/forum/NewPostModal";
 import { Logo } from "@/components/ui/Logo";
-import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { useAuth } from "@/contexts/AuthContext";
 
 const iconMap = {
@@ -84,7 +83,6 @@ export default function HomePage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {user && <NotificationDropdown />}
             <Button className="md:w-auto" size="lg" onClick={() => setModalOpen(true)}>
               <Plus className="mr-1 h-4 w-4" />
               New Post

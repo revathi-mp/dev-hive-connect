@@ -4,8 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Logo } from "@/components/ui/Logo";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { 
-  Bell, 
   LogIn, 
   Menu, 
   Search, 
@@ -19,7 +19,6 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export function Header() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, signOut, loading } = useAuth();
@@ -50,14 +49,6 @@ export function Header() {
         variant: "destructive",
       });
     }
-  };
-
-  const handleNotificationClick = () => {
-    setHasUnreadNotifications(false);
-    toast({
-      title: "Notifications",
-      description: "You have no new notifications.",
-    });
   };
 
   const getInitials = (email: string) => {
@@ -97,20 +88,7 @@ export function Header() {
         )}
         
         <div className="flex items-center gap-2">
-          {user && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleNotificationClick}
-              className="relative"
-            >
-              <Bell className="h-5 w-5" />
-              {hasUnreadNotifications && (
-                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"></span>
-              )}
-              <span className="sr-only">Notifications</span>
-            </Button>
-          )}
+          {user && <NotificationDropdown />}
           
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
             {theme === 'light' ? (
