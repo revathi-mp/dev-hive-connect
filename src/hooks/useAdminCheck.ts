@@ -3,43 +3,37 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export function useAdminCheck() {
-  const { user } = useAuth();
+export const useAdminCheck = () => {
+  const { user, loading: authLoading } = useAuth();
 
   return useQuery({
     queryKey: ['admin-check', user?.id],
     queryFn: async () => {
-      if (!user) {
-        console.log('No user found for admin check');
+      if (!user?.id) {
+        console.log('No user ID available for admin check');
         return false;
       }
-      
-      console.log('Checking admin status for user:', user.id, 'email:', user.email);
+
+      console.log('Checking admin status for user:', user.id);
       
       try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .maybeSingle();
+        const { data, error } = await supabase.rpc('is_admin', {
+          _user_id: user.id
+        });
 
         if (error) {
-          console.log('Error checking admin status:', error.message);
-          return false;
+          console.error('Error checking admin status:', error);
+          throw error;
         }
 
-        const isAdmin = !!data;
-        console.log('User admin check result:', isAdmin);
-        return isAdmin;
+        console.log('Admin check result:', data);
+        return data || false;
       } catch (error) {
-        console.error('Error in admin check:', error);
+        console.error('Admin check failed:', error);
         return false;
       }
     },
-    enabled: !!user,
+    enabled: !!user?.id && !authLoading,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
-    retry: 1,
   });
-}
+};

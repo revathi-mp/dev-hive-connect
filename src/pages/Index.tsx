@@ -1,10 +1,26 @@
-
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import HomePage from './HomePage';
+import { useAdminCheck } from '@/hooks/useAdminCheck';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const { data: isAdmin, isLoading: adminLoading } = useAdminCheck();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !adminLoading) {
+      if (user && isAdmin) {
+        console.log('Admin user detected, redirecting to admin panel');
+        navigate("/admin");
+      } else if (user) {
+        console.log('Regular user detected, redirecting to home');
+        navigate("/home");
+      }
+    }
+  }, [user, isAdmin, loading, adminLoading, navigate]);
 
   console.log('Index component state:', {
     user: user?.email,

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,16 +11,19 @@ import {
   User,
   Moon,
   Sun,
-  LogOut
+  LogOut,
+  Shield
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
 
 export function Header() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, signOut, loading } = useAuth();
+  const { data: isAdmin } = useAdminCheck();
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -104,6 +106,14 @@ export function Header() {
               <div className="h-8 w-8 bg-muted rounded-full animate-pulse"></div>
             ) : user ? (
               <>
+                {isAdmin && (
+                  <Button variant="outline" size="sm" className="gap-1 hidden sm:flex" asChild>
+                    <Link to="/admin">
+                      <Shield className="h-4 w-4" />
+                      Admin
+                    </Link>
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" className="gap-1 hidden md:flex" onClick={handleLogout}>
                   <LogOut className="h-4 w-4" />
                   Logout
