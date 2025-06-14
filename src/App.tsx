@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import HomePage from "./pages/HomePage";
 import Index from "./pages/Index";
 import LoginPage from "./pages/LoginPage";
+import AdminLoginPage from "./pages/AdminLoginPage";
 import SignupPage from "./pages/SignupPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/category/:categorySlug" element={<CategoryPage />} />
             <Route path="/post/:postId" element={<PostPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />

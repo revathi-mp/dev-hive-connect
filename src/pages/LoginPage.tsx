@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import { Github } from "lucide-react";
+import { Github, Users, Shield } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -42,7 +42,7 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
-    console.log('Login form submitted for:', data.email);
+    console.log('User login form submitted for:', data.email);
     
     try {
       const { error } = await signIn(data.email, data.password);
@@ -50,7 +50,7 @@ export default function LoginPage() {
       if (error) {
         console.error("Login error:", error);
         
-        let errorMessage = "An error occurred during login. Please try again.";
+        let errorMessage = "Login failed. Please check your credentials.";
         
         if (error.message) {
           errorMessage = error.message;
@@ -64,8 +64,8 @@ export default function LoginPage() {
       } else {
         console.log('Login successful, showing success toast');
         toast({
-          title: "Login Successful",
-          description: "Welcome back to DevHive Connect!",
+          title: "Welcome Back!",
+          description: "Successfully logged into DevHive Connect!",
         });
         
         // Small delay to ensure auth state is updated
@@ -101,10 +101,17 @@ export default function LoginPage() {
 
   return (
     <AuthLayout
-      title="Sign in to your account"
-      description="Enter your email and password to sign in to your account"
+      title="Welcome back to the community"
+      description="Sign in to your account to join the discussion"
     >
       <div className="grid gap-6">
+        <div className="flex items-center justify-center gap-2 p-3 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
+          <Users className="h-4 w-4 text-green-600" />
+          <span className="text-sm font-medium text-green-700 dark:text-green-300">
+            Community Member Login
+          </span>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <FormField
@@ -123,7 +130,7 @@ export default function LoginPage() {
                   <FormControl>
                     <Input 
                       id="email" 
-                      placeholder="m@example.com" 
+                      placeholder="your.email@example.com" 
                       type="email" 
                       autoComplete="email"
                       disabled={isLoading}
@@ -169,14 +176,14 @@ export default function LoginPage() {
               )}
             />
             <Button className="w-full" type="submit" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? "Signing in..." : "Sign In to Forum"}
             </Button>
           </form>
         </Form>
         
         <div className="text-center">
           <p className="text-sm text-muted-foreground mb-4">
-            If you're having trouble logging in, make sure you've confirmed your email address.
+            New users require admin approval before accessing the forum.
           </p>
         </div>
 
@@ -206,14 +213,26 @@ export default function LoginPage() {
             GitHub
           </Button>
         </div>
-        <div className="text-center text-sm">
-          Don&apos;t have an account?{" "}
-          <Link
-            to="/signup"
-            className="font-medium text-primary underline-offset-4 hover:underline"
-          >
-            Sign up
-          </Link>
+        
+        <div className="text-center text-sm border-t pt-4 space-y-2">
+          <div>
+            Don&apos;t have an account?{" "}
+            <Link
+              to="/signup"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Sign up for forum
+            </Link>
+          </div>
+          <div className="text-muted-foreground">
+            <Link
+              to="/admin/login"
+              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium"
+            >
+              <Shield className="h-3 w-3" />
+              Admin Login
+            </Link>
+          </div>
         </div>
       </div>
     </AuthLayout>

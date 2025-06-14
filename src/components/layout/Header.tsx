@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Logo } from "@/components/ui/Logo";
@@ -12,17 +12,21 @@ import {
   User,
   Moon,
   Sun,
-  LogOut
+  LogOut,
+  Shield
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
 
 export function Header() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { user, signOut, loading } = useAuth();
+  const { data: isAdmin } = useAdminCheck();
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -136,6 +140,14 @@ export function Header() {
             <div className="flex items-center gap-2">
               {user ? (
                 <>
+                  {isAdmin && (
+                    <Button variant="outline" size="sm" className="gap-1" asChild>
+                      <Link to="/admin">
+                        <Shield className="h-4 w-4" />
+                        Admin Panel
+                      </Link>
+                    </Button>
+                  )}
                   <Button variant="outline" size="sm" className="gap-1" onClick={handleLogout}>
                     <LogOut className="h-4 w-4" />
                     Logout
