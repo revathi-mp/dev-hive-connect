@@ -22,29 +22,16 @@ export function useAdminCheck() {
           .select('role')
           .eq('user_id', user.id)
           .eq('role', 'admin')
-          .single();
+          .maybeSingle();
 
         if (error) {
-          console.log('User is not admin or error occurred:', error.message);
-          
-          // Check if user exists in profiles table
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('id, username, approved')
-            .eq('id', user.id)
-            .single();
-            
-          if (profileError) {
-            console.error('Profile not found for user:', user.id, profileError);
-          } else {
-            console.log('User profile found:', profile);
-          }
-          
+          console.log('Error checking admin status:', error.message);
           return false;
         }
 
-        console.log('User admin check result:', !!data, 'role data:', data);
-        return !!data;
+        const isAdmin = !!data;
+        console.log('User admin check result:', isAdmin);
+        return isAdmin;
       } catch (error) {
         console.error('Error in admin check:', error);
         return false;
@@ -52,6 +39,7 @@ export function useAdminCheck() {
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 }
