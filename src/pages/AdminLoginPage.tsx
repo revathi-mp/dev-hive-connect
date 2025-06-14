@@ -12,7 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 
 // Designated admin email - only this email can access admin panel
-const ADMIN_EMAIL = "admin@devhive.com";
+const ADMIN_EMAIL = "revathimp69@gmail.com";
+const ADMIN_PASSWORD = "password123";
 
 export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -50,8 +51,8 @@ export default function AdminLoginPage() {
       return;
     }
 
-    // Check if the email is the designated admin email
-    if (data.email !== ADMIN_EMAIL) {
+    // Check if the email and password match the designated admin credentials
+    if (data.email !== ADMIN_EMAIL || data.password !== ADMIN_PASSWORD) {
       toast({
         title: "Invalid Credentials",
         description: "Invalid email or password.",
