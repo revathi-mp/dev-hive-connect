@@ -25,8 +25,6 @@ import TermsPage from "./pages/TermsPage";
 import UserProfilePage from "./pages/UserProfilePage";
 import InterviewQuestionsPage from "./pages/InterviewQuestionsPage";
 import InterviewQuestionDetailPage from "./pages/InterviewQuestionDetailPage";
-import AdminPage from "./pages/AdminPage";
-import AdminLoginPage from "./pages/AdminLoginPage";
 
 const queryClient = new QueryClient();
 
@@ -57,8 +55,6 @@ const App = () => (
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/user/:username" element={<UserProfilePage />} />
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="/admin/login" element={<AdminLoginPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
