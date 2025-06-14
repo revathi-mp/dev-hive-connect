@@ -34,9 +34,10 @@ export const useAuthState = () => {
         
         if (!mounted) return;
         
+        setSession(session);
+        setUser(session?.user || null);
+        
         if (session?.user) {
-          setSession(session);
-          setUser(session.user);
           // Only update approval status for authenticated users
           try {
             await updateApprovalStatus(session.user.id);
@@ -45,15 +46,11 @@ export const useAuthState = () => {
             setIsApproved(false);
           }
         } else {
-          setSession(null);
-          setUser(null);
           setIsApproved(false);
         }
         
-        // ALWAYS set loading to false after processing auth state - this is crucial
-        if (mounted) {
-          setLoading(false);
-        }
+        // ALWAYS set loading to false after processing auth state
+        setLoading(false);
       }
     );
 
@@ -75,16 +72,24 @@ export const useAuthState = () => {
         
         console.log('Initial session:', session?.user?.email || 'No session');
         
-        // If we have a session, the auth state change listener will handle it
-        // If we don't have a session, set loading to false immediately
-        if (!session) {
-          setSession(null);
-          setUser(null);
+        // Set the session and user immediately
+        setSession(session);
+        setUser(session?.user || null);
+        
+        // If we have a session, update approval status
+        if (session?.user) {
+          try {
+            await updateApprovalStatus(session.user.id);
+          } catch (error) {
+            console.error('Error in initial approval check:', error);
+            setIsApproved(false);
+          }
+        } else {
           setIsApproved(false);
-          setLoading(false);
         }
-        // Note: If we have a session, don't set loading to false here
-        // because the auth state change listener will handle it
+        
+        // Set loading to false after processing
+        setLoading(false);
       } catch (error) {
         console.error('Error in getSession:', error);
         if (mounted) {
