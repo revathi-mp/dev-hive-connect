@@ -5,7 +5,6 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { PostCard } from "@/components/forum/PostCard";
 import { CategoryCard } from "@/components/forum/CategoryCard";
 import { TagList } from "@/components/forum/TagList";
-import { HomeAdminLoginPanel } from "@/components/admin/HomeAdminLoginPanel";
 import { mockPosts, mockCategories, mockTags } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
 import { Plus, Code, FileCode, Settings, BookOpen, Bell, Users, Search } from "lucide-react";
@@ -71,31 +70,6 @@ export default function HomePage() {
     setViewAllPosts(false);
   };
 
-  // Show login panel when not logged in
-  if (!user) {
-    return (
-      <MainLayout>
-        <div className="container py-6">
-          <div className="mb-8 flex flex-col items-center justify-center gap-4">
-            <div className="flex items-center gap-4">
-              <Logo size="lg" className="text-primary" />
-              <div className="text-center">
-                <h1 className="text-3xl font-bold tracking-tight">DevHive Connect</h1>
-                <p className="mt-1 text-lg text-muted-foreground">
-                  Where developers collaborate, share knowledge, and grow together
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <HomeAdminLoginPanel />
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
-
   return (
     <MainLayout>
       <div className="container py-6">
@@ -109,12 +83,14 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button className="md:w-auto" size="lg" onClick={() => setModalOpen(true)}>
-              <Plus className="mr-1 h-4 w-4" />
-              New Post
-            </Button>
-          </div>
+          {user && (
+            <div className="flex items-center gap-2">
+              <Button className="md:w-auto" size="lg" onClick={() => setModalOpen(true)}>
+                <Plus className="mr-1 h-4 w-4" />
+                New Post
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="mb-8 flex w-full max-w-md items-center relative">
@@ -197,7 +173,7 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-      <NewPostModal open={modalOpen} onOpenChange={setModalOpen} onSubmit={handleNewPost} />
+      {user && <NewPostModal open={modalOpen} onOpenChange={setModalOpen} onSubmit={handleNewPost} />}
     </MainLayout>
   );
 }
