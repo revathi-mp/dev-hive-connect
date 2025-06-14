@@ -4,13 +4,48 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Clock, Shield, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
+import { useNavigate } from "react-router-dom";
+import { useAuthState } from "@/hooks/useAuthState";
 
 export function PendingApprovalPage() {
   const { user, signOut } = useAuth();
+  const { data: isAdmin } = useAdminCheck();
+  const { updateApprovalStatus } = useAuthState();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
   };
+
+  const handleCheckStatus = async () => {
+    if (!user) return;
+    
+    console.log('Checking user approval status...');
+    
+    // Refresh the approval status
+    const isApproved = await updateApprovalStatus(user.id);
+    
+    console.log('Updated approval status:', isApproved);
+    
+    if (isApproved) {
+      // If user is now approved, redirect to home
+      navigate("/home");
+    } else if (isAdmin) {
+      // If user is admin, redirect to admin panel
+      navigate("/admin");
+    } else {
+      // If still not approved, just refresh the page to show updated status
+      window.location.reload();
+    }
+  };
+
+  // If user is admin, redirect to admin panel
+  React.useEffect(() => {
+    if (isAdmin) {
+      navigate("/admin");
+    }
+  }, [isAdmin, navigate]);
 
   return (
     <MainLayout>
@@ -63,7 +98,7 @@ export function PendingApprovalPage() {
             <Button variant="outline" onClick={handleSignOut}>
               Sign Out
             </Button>
-            <Button onClick={() => window.location.reload()}>
+            <Button onClick={handleCheckStatus}>
               Check Status
             </Button>
           </div>
