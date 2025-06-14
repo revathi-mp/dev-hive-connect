@@ -5,60 +5,138 @@ import { supabase } from "@/integrations/supabase/client";
 import { Users, UserCheck, UserX, Shield, AlertTriangle, Calendar } from "lucide-react";
 
 export function AdminStats() {
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading, error } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
       console.log('Fetching enhanced admin stats...');
       
-      // Get total users
-      const { count: totalUsers } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
+      try {
+        // Get total users
+        const { count: totalUsers, error: totalError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
 
-      // Get approved users
-      const { count: approvedUsers } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('approved', true);
+        if (totalError) {
+          console.error('Error fetching total users:', totalError);
+          throw totalError;
+        }
 
-      // Get pending users
-      const { count: pendingUsers } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('approved', false);
+        // Get approved users
+        const { count: approvedUsers, error: approvedError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('approved', true);
 
-      // Get admin users
-      const { count: adminUsers } = await supabase
-        .from('user_roles')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'admin');
+        if (approvedError) {
+          console.error('Error fetching approved users:', approvedError);
+          throw approvedError;
+        }
 
-      // Get recent signups (last 24 hours) - potential fake user indicator
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      
-      const { count: recentSignups } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', yesterday.toISOString());
+        // Get pending users
+        const { count: pendingUsers, error: pendingError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('approved', false);
 
-      // Get users with suspicious patterns (no first/last name)
-      const { count: suspiciousUsers } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .or('first_name.is.null,last_name.is.null,first_name.eq.,last_name.eq.')
-        .eq('approved', false);
+        if (pendingError) {
+          console.error('Error fetching pending users:', pendingError);
+          throw pendingError;
+        }
 
-      return {
-        totalUsers: totalUsers || 0,
-        approvedUsers: approvedUsers || 0,
-        pendingUsers: pendingUsers || 0,
-        adminUsers: adminUsers || 0,
-        recentSignups: recentSignups || 0,
-        suspiciousUsers: suspiciousUsers || 0,
-      };
+        // Get admin users
+        const { count: adminUsers, error: adminError } = await supabase
+          .from('user_roles')
+          .select('*', { count: 'exact', head: true })
+          .eq('role', 'admin');
+
+        if (adminError) {
+          console.error('Error fetching admin users:', adminError);
+          throw adminError;
+        }
+
+        // Get recent signups (last 24 hours)
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        const { count: recentSignups, error: recentError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', yesterday.toISOString());
+
+        if (recentError) {
+          console.error('Error fetching recent signups:', recentError);
+          throw recentError;
+        }
+
+        // Get users with suspicious patterns (no first/last name)
+        const { count: suspiciousUsers, error: suspiciousError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .or('first_name.is.null,last_name.is.null,first_name.eq.,last_name.eq.')
+          .eq('approved', false);
+
+        if (suspiciousError) {
+          console.error('Error fetching suspicious users:', suspiciousError);
+          throw suspiciousError;
+        }
+
+        const statsData = {
+          totalUsers: totalUsers || 0,
+          approvedUsers: approvedUsers || 0,
+          pendingUsers: pendingUsers || 0,
+          adminUsers: adminUsers || 0,
+          recentSignups: recentSignups || 0,
+          suspiciousUsers: suspiciousUsers || 0,
+        };
+
+        console.log('Admin stats fetched successfully:', statsData);
+        return statsData;
+      } catch (error) {
+        console.error('Error in admin stats query:', error);
+        throw error;
+      }
     },
   });
+
+  if (isLoading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="h-4 w-20 bg-muted animate-pulse rounded"></div>
+              <div className="h-4 w-4 bg-muted animate-pulse rounded"></div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 w-16 bg-muted animate-pulse rounded mb-2"></div>
+              <div className="h-3 w-24 bg-muted animate-pulse rounded"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error('Admin stats error:', error);
+    return (
+      <div className="grid gap-4 md:grid-cols-1">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center text-red-600">
+              <p className="font-medium">Error loading statistics</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {error instanceof Error ? error.message : 'Unknown error occurred'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Check the console for more details
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
