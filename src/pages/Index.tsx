@@ -12,15 +12,17 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !adminLoading) {
-      if (user && isAdmin) {
+    if (!loading && !adminLoading && user) {
+      // Only redirect to admin if user is logged in AND is an admin
+      if (isAdmin) {
         console.log('Admin user detected, redirecting to admin panel');
         navigate("/admin");
-      } else if (user) {
-        console.log('Regular user detected, redirecting to home');
-        navigate("/home");
+      } else {
+        console.log('Regular user detected, staying on home');
+        // Regular users stay on home page - no redirect needed
       }
     }
+    // If user is not logged in, they stay on the home page to see login panel
   }, [user, isAdmin, loading, adminLoading, navigate]);
 
   console.log('Index component state:', {
