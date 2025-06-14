@@ -74,24 +74,6 @@ export function Header() {
     return "GU";
   };
 
-  if (loading) {
-    return (
-      <header className="sticky top-0 z-40 border-b bg-background">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2 md:gap-4">
-            <Link to="/" className="flex items-center gap-2">
-              <Logo size="md" />
-              <span className="text-xl font-bold tracking-tight">DevHive Connect</span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-muted rounded-full animate-pulse"></div>
-          </div>
-        </div>
-      </header>
-    );
-  }
-
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
       <div className="container flex h-16 items-center justify-between">
@@ -105,6 +87,7 @@ export function Header() {
             <span className="text-xl font-bold tracking-tight">DevHive Connect</span>
           </Link>
         </div>
+        
         <div className="hidden md:flex md:flex-1 md:items-center md:justify-end md:gap-4">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -115,6 +98,7 @@ export function Header() {
             />
           </div>
         </div>
+        
         <div className="flex items-center gap-2">
           <Button 
             variant="ghost" 
@@ -128,6 +112,7 @@ export function Header() {
             )}
             <span className="sr-only">Notifications</span>
           </Button>
+          
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
             {theme === 'light' ? (
               <Moon className="h-5 w-5" />
@@ -136,47 +121,48 @@ export function Header() {
             )}
             <span className="sr-only">Toggle theme</span>
           </Button>
-          <div className="hidden md:block">
-            <div className="flex items-center gap-2">
-              {user ? (
-                <>
-                  {isAdmin && (
-                    <Button variant="outline" size="sm" className="gap-1" asChild>
-                      <Link to="/admin">
-                        <Shield className="h-4 w-4" />
-                        Admin Panel
-                      </Link>
-                    </Button>
-                  )}
-                  <Button variant="outline" size="sm" className="gap-1" onClick={handleLogout}>
-                    <LogOut className="h-4 w-4" />
-                    Logout
-                  </Button>
-                  <Button variant="ghost" size="icon" asChild>
-                    <Link to="/profile">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>{getInitials(user.email || "")}</AvatarFallback>
-                      </Avatar>
+          
+          <div className="flex items-center gap-2">
+            {loading ? (
+              <div className="h-8 w-8 bg-muted rounded-full animate-pulse"></div>
+            ) : user ? (
+              <>
+                {isAdmin && (
+                  <Button variant="outline" size="sm" className="gap-1 hidden md:flex" asChild>
+                    <Link to="/admin">
+                      <Shield className="h-4 w-4" />
+                      Admin Panel
                     </Link>
                   </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="outline" size="sm" className="gap-1" asChild>
-                    <Link to="/login">
-                      <LogIn className="h-4 w-4" />
-                      Login
-                    </Link>
-                  </Button>
-                  <Button size="sm" className="gap-1" asChild>
-                    <Link to="/signup">
-                      <User className="h-4 w-4" />
-                      Sign up
-                    </Link>
-                  </Button>
-                </>
-              )}
-            </div>
+                )}
+                <Button variant="outline" size="sm" className="gap-1 hidden md:flex" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+                <Button variant="ghost" size="icon" asChild>
+                  <Link to="/profile">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>{getInitials(user.email || "")}</AvatarFallback>
+                    </Avatar>
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" className="gap-1" asChild>
+                  <Link to="/login">
+                    <LogIn className="h-4 w-4" />
+                    Login
+                  </Link>
+                </Button>
+                <Button size="sm" className="gap-1" asChild>
+                  <Link to="/signup">
+                    <User className="h-4 w-4" />
+                    Sign up
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

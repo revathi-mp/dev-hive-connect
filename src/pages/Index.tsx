@@ -18,9 +18,25 @@ const Index = () => {
     adminError
   });
 
-  // Show loading spinner while checking authentication or admin status
-  if (loading || (user && adminLoading)) {
-    console.log('Showing loading state - loading:', loading, 'adminLoading:', adminLoading);
+  // Show loading spinner while checking authentication
+  if (loading) {
+    console.log('Showing loading state - loading:', loading);
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // If no user, redirect to home (which will show login options)
+  if (!user) {
+    console.log('No user, redirecting to home');
+    return <Navigate to="/home" replace />;
+  }
+
+  // If user exists but admin check is still loading, show loading
+  if (user && adminLoading) {
+    console.log('Admin check loading for user:', user.email);
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -46,8 +62,8 @@ const Index = () => {
     return <Navigate to="/home" replace />;
   }
 
-  // If no user, redirect to home (which will show login options)
-  console.log('No user, redirecting to home');
+  // Fallback to home
+  console.log('Fallback redirect to home');
   return <Navigate to="/home" replace />;
 };
 
