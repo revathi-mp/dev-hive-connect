@@ -98,7 +98,7 @@ export default function AdminDashboardPage() {
             <CardContent>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500" />
-                <Badge variant="success" className="bg-green-100 text-green-800">
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
                   {forumStats.forumStatus.toUpperCase()}
                 </Badge>
                 <span className="text-sm text-muted-foreground ml-2">
