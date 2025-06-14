@@ -10,6 +10,8 @@ import { Plus, Code, FileCode, Settings, BookOpen, Bell, Users, Search } from "l
 import { Input } from "@/components/ui/input";
 import { NewPostModal } from "@/components/forum/NewPostModal";
 import { Logo } from "@/components/ui/Logo";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
+import { useAuth } from "@/contexts/AuthContext";
 
 const iconMap = {
   "Code": Code,
@@ -25,6 +27,7 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [posts, setPosts] = useState(mockPosts);
   const [viewAllPosts, setViewAllPosts] = useState(false);
+  const { user } = useAuth();
 
   const categoriesWithIcons = mockCategories.map(category => ({
     ...category,
@@ -80,10 +83,13 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-          <Button className="md:w-auto" size="lg" onClick={() => setModalOpen(true)}>
-            <Plus className="mr-1 h-4 w-4" />
-            New Post
-          </Button>
+          <div className="flex items-center gap-2">
+            {user && <NotificationDropdown />}
+            <Button className="md:w-auto" size="lg" onClick={() => setModalOpen(true)}>
+              <Plus className="mr-1 h-4 w-4" />
+              New Post
+            </Button>
+          </div>
         </div>
         <div className="mb-8 flex w-full max-w-md items-center relative">
           <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
