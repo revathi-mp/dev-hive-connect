@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { signIn, user, loading, isApproved } = useAuth();
+  const { signIn, user, loading } = useAuth();
   
   const form = useForm({
     defaultValues: {
@@ -23,18 +23,13 @@ export default function LoginPage() {
     },
   });
 
-  // Redirect based on user status
+  // Redirect if already logged in
   useEffect(() => {
     if (!loading && user) {
-      if (isApproved) {
-        console.log('User is approved, redirecting to home');
-        navigate("/home");
-      } else {
-        console.log('User is not approved, redirecting to index for pending approval');
-        navigate("/");
-      }
+      console.log('User is logged in, redirecting to home');
+      navigate("/");
     }
-  }, [user, loading, isApproved, navigate]);
+  }, [user, loading, navigate]);
 
   const onSubmit = async (data: { email: string; password: string }) => {
     if (!data.email || !data.password) {
@@ -47,7 +42,7 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
-    console.log('Community member login form submitted for:', data.email);
+    console.log('Login form submitted for:', data.email);
     
     try {
       const { error } = await signIn(data.email, data.password);
@@ -181,12 +176,6 @@ export default function LoginPage() {
           </form>
         </Form>
         
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground mb-4">
-            New users require admin approval before accessing the forum.
-          </p>
-        </div>
-
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
@@ -222,15 +211,6 @@ export default function LoginPage() {
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               Sign up for forum
-            </Link>
-          </div>
-          <div className="text-muted-foreground">
-            <Link
-              to="/admin/login"
-              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium"
-            >
-              <Shield className="h-3 w-3" />
-              Admin Login
             </Link>
           </div>
         </div>
