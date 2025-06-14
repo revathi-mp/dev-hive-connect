@@ -12,7 +12,8 @@ import {
   User,
   Moon,
   Sun,
-  LogOut
+  LogOut,
+  Shield
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -90,6 +91,14 @@ export function Header() {
         <div className="flex items-center gap-2">
           {/* Show notifications for all users (logged in or not) */}
           <NotificationDropdown />
+          
+          {/* Admin Panel Link */}
+          <Button variant="ghost" size="icon" asChild>
+            <Link to="/admin-login" title="Admin Panel">
+              <Shield className="h-5 w-5" />
+              <span className="sr-only">Admin Panel</span>
+            </Link>
+          </Button>
           
           {/* Dark mode toggle for all users */}
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
