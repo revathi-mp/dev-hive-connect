@@ -82,8 +82,8 @@ export default function AdminLoginPage() {
           description: "Welcome to the admin panel!",
         });
         
-        // Navigate to root and let Index.tsx handle the admin redirect
-        navigate("/");
+        // Navigate directly to admin panel
+        navigate("/admin");
       }
     } catch (error) {
       console.error("Unexpected admin login error:", error);

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import HomePage from './HomePage';
@@ -24,12 +25,13 @@ const Index = () => {
 
   console.log('Index component state:', {
     user: user?.email,
-    loading
+    loading,
+    isAdmin
   });
 
   // Show loading spinner while checking authentication
-  if (loading) {
-    console.log('Showing loading state - loading:', loading);
+  if (loading || adminLoading) {
+    console.log('Showing loading state - loading:', loading, 'adminLoading:', adminLoading);
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
