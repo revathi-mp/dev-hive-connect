@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminCheck } from '@/hooks/useAdminCheck';
 import { PendingApprovalPage } from '@/components/auth/PendingApprovalPage';
+import HomePage from './HomePage';
 
 const Index = () => {
   const { user, loading, isApproved } = useAuth();
@@ -28,10 +29,10 @@ const Index = () => {
     );
   }
 
-  // If no user, redirect to home (which will show login options)
+  // If no user, show the HomePage which contains login/signup options
   if (!user) {
-    console.log('No user, redirecting to home');
-    return <Navigate to="/home" replace />;
+    console.log('No user, showing HomePage with login/signup options');
+    return <HomePage />;
   }
 
   // If user exists but admin check is still loading, show loading
@@ -56,15 +57,15 @@ const Index = () => {
     return <PendingApprovalPage />;
   }
 
-  // If user is logged in and approved, redirect to home
+  // If user is logged in and approved, show HomePage (which will show authenticated view)
   if (user && isApproved) {
-    console.log('Redirecting approved user to home');
-    return <Navigate to="/home" replace />;
+    console.log('Showing HomePage for approved user');
+    return <HomePage />;
   }
 
-  // Fallback to home
-  console.log('Fallback redirect to home');
-  return <Navigate to="/home" replace />;
+  // Fallback to HomePage
+  console.log('Fallback showing HomePage');
+  return <HomePage />;
 };
 
 export default Index;
