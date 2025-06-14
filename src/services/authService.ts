@@ -28,17 +28,17 @@ export const signUpUser = async (email: string, password: string, userData: any)
     
     console.log('Signup successful:', data);
     
+    // Check if email confirmation is required
     if (data.user && !data.session) {
       console.log('Email confirmation required for user:', data.user.email);
       return { 
-        error: { 
-          message: 'Please check your email and click the confirmation link to complete your registration.',
-          name: 'EmailConfirmationRequired'
-        } 
+        data,
+        error: null,
+        needsConfirmation: true
       };
     }
     
-    return { error: null };
+    return { data, error: null, needsConfirmation: false };
   } catch (err) {
     console.error('Unexpected signup error:', err);
     return { error: err };
@@ -57,6 +57,7 @@ export const signInUser = async (email: string, password: string) => {
     if (error) {
       console.error('Signin error:', error);
       
+      // Handle specific error cases
       if (error.message.includes('Invalid login credentials')) {
         return { 
           error: { 
@@ -64,13 +65,27 @@ export const signInUser = async (email: string, password: string) => {
             message: 'Invalid email or password. Please check your credentials and try again.'
           } 
         };
+      } else if (error.message.includes('Email not confirmed')) {
+        return {
+          error: {
+            ...error,
+            message: 'Please check your email and click the confirmation link before signing in.'
+          }
+        };
+      } else if (error.message.includes('Signup requires a valid password')) {
+        return {
+          error: {
+            ...error,
+            message: 'Password is required to sign in.'
+          }
+        };
       }
       
       return { error };
     }
     
     console.log('Signin successful for:', data.user?.email);
-    return { error: null };
+    return { data, error: null };
   } catch (err) {
     console.error('Unexpected signin error:', err);
     return { error: err };

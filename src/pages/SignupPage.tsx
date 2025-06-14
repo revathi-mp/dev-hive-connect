@@ -92,19 +92,19 @@ export default function SignupPage() {
     console.log('Signup form submitted for:', data.email);
     
     try {
-      const { error } = await signUp(data.email, data.password, {
+      const result = await signUp(data.email, data.password, {
         firstName: data.firstName,
         lastName: data.lastName,
         username: data.username,
       });
 
-      if (error) {
-        console.error("Signup error:", error);
+      if (result.error) {
+        console.error("Signup error:", result.error);
         
         let errorMessage = "Please check your information and try again.";
         
-        if (error.message) {
-          if (error.message.includes('User already registered')) {
+        if (result.error.message) {
+          if (result.error.message.includes('User already registered')) {
             // Handle existing user case
             setExistingEmail(data.email);
             setShowResendOption(true);
@@ -115,7 +115,7 @@ export default function SignupPage() {
             });
             return;
           } else {
-            errorMessage = error.message;
+            errorMessage = result.error.message;
           }
         }
         
@@ -125,10 +125,17 @@ export default function SignupPage() {
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Account Created Successfully",
-          description: "Your account has been created. Please check your email for confirmation.",
-        });
+        if (result.needsConfirmation) {
+          toast({
+            title: "Account Created Successfully",
+            description: "Please check your email and click the confirmation link to complete your registration.",
+          });
+        } else {
+          toast({
+            title: "Account Created Successfully",
+            description: "Your account has been created and you are now logged in!",
+          });
+        }
         navigate("/login");
       }
     } catch (error) {
