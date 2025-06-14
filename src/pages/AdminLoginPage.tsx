@@ -8,15 +8,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Shield } from "lucide-react";
-
-// Simple admin credentials - in production, this would be in a secure backend
-const ADMIN_CREDENTIALS = {
-  email: "admin@devhive.com",
-  password: "admin123"
-};
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreateMode, setIsCreateMode] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -27,27 +23,57 @@ export default function AdminLoginPage() {
     },
   });
 
+  const callAdminAuth = async (email: string, password: string, action: 'login' | 'create') => {
+    const { data, error } = await supabase.functions.invoke('admin-auth', {
+      body: { email, password, action }
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  };
+
   const onSubmit = async (data: { email: string; password: string }) => {
     setIsLoading(true);
     
-    // Simulate login delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (data.email === ADMIN_CREDENTIALS.email && data.password === ADMIN_CREDENTIALS.password) {
-      // Store admin session in localStorage
-      localStorage.setItem('adminLoggedIn', 'true');
-      localStorage.setItem('adminEmail', data.email);
+    try {
+      const action = isCreateMode ? 'create' : 'login';
+      const result = await callAdminAuth(data.email, data.password, action);
       
+      if (result.error) {
+        toast({
+          title: isCreateMode ? "Creation Failed" : "Login Failed",
+          description: result.error,
+          variant: "destructive",
+        });
+      } else {
+        if (isCreateMode) {
+          toast({
+            title: "Admin Created",
+            description: "Admin user created successfully! You can now login.",
+          });
+          setIsCreateMode(false);
+          form.reset();
+        } else {
+          // Store admin session permanently in localStorage
+          localStorage.setItem('adminLoggedIn', 'true');
+          localStorage.setItem('adminEmail', data.email);
+          localStorage.setItem('adminSessionTime', Date.now().toString());
+          
+          toast({
+            title: "Admin Login Successful",
+            description: "Welcome to the admin dashboard!",
+          });
+          
+          navigate("/admin-dashboard");
+        }
+      }
+    } catch (error) {
       toast({
-        title: "Admin Login Successful",
-        description: "Welcome to the admin dashboard!",
-      });
-      
-      navigate("/admin-dashboard");
-    } else {
-      toast({
-        title: "Login Failed",
-        description: "Invalid admin credentials. Please try again.",
+        title: isCreateMode ? "Creation Failed" : "Login Failed",
+        description: "An error occurred. Please try again.",
         variant: "destructive",
       });
     }
@@ -62,9 +88,14 @@ export default function AdminLoginPage() {
           <div className="flex justify-center mb-4">
             <Shield className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Admin Login</CardTitle>
+          <CardTitle className="text-2xl">
+            {isCreateMode ? "Create Admin" : "Admin Login"}
+          </CardTitle>
           <CardDescription>
-            Enter your admin credentials to access the dashboard
+            {isCreateMode 
+              ? "Create your admin account" 
+              : "Enter your admin credentials to access the dashboard"
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -86,7 +117,7 @@ export default function AdminLoginPage() {
                     <FormControl>
                       <Input 
                         type="email" 
-                        placeholder="admin@devhive.com"
+                        placeholder="your@email.com"
                         disabled={isLoading}
                         {...field} 
                       />
@@ -105,6 +136,7 @@ export default function AdminLoginPage() {
                     <FormControl>
                       <Input 
                         type="password"
+                        placeholder="Enter your password"
                         disabled={isLoading}
                         {...field} 
                       />
@@ -114,12 +146,27 @@ export default function AdminLoginPage() {
                 )}
               />
               <Button className="w-full" type="submit" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login as Admin"}
+                {isLoading 
+                  ? (isCreateMode ? "Creating..." : "Logging in...") 
+                  : (isCreateMode ? "Create Admin" : "Login as Admin")
+                }
               </Button>
             </form>
           </Form>
-          <div className="mt-4 text-center text-sm text-muted-foreground">
-            Demo credentials: admin@devhive.com / admin123
+          <div className="mt-4 text-center">
+            <Button 
+              variant="link" 
+              onClick={() => {
+                setIsCreateMode(!isCreateMode);
+                form.reset();
+              }}
+              disabled={isLoading}
+            >
+              {isCreateMode 
+                ? "Already have an admin account? Login" 
+                : "Need to create an admin account? Create one"
+              }
+            </Button>
           </div>
         </CardContent>
       </Card>

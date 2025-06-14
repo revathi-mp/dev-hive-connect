@@ -30,21 +30,24 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
-    // Check if admin is logged in
+    // Check if admin is logged in permanently
     const isAdminLoggedIn = localStorage.getItem('adminLoggedIn');
     const storedAdminEmail = localStorage.getItem('adminEmail');
+    const sessionTime = localStorage.getItem('adminSessionTime');
     
-    if (!isAdminLoggedIn || !storedAdminEmail) {
+    if (!isAdminLoggedIn || !storedAdminEmail || !sessionTime) {
       navigate("/admin-login");
       return;
     }
     
+    // Session is permanent, no expiration check needed
     setAdminEmail(storedAdminEmail);
   }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('adminLoggedIn');
     localStorage.removeItem('adminEmail');
+    localStorage.removeItem('adminSessionTime');
     
     toast({
       title: "Logged Out",
