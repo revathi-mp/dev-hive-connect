@@ -2,12 +2,14 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminCheck } from '@/hooks/useAdminCheck';
 import { PendingApprovalPage } from '@/components/auth/PendingApprovalPage';
 
 const Index = () => {
   const { user, loading, isApproved } = useAuth();
+  const { data: isAdmin, isLoading: adminLoading } = useAdminCheck();
 
-  if (loading) {
+  if (loading || adminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -15,8 +17,13 @@ const Index = () => {
     );
   }
 
-  // If user is logged in but not approved, show pending approval page
-  if (user && !isApproved) {
+  // If user is logged in and is admin, redirect to admin panel
+  if (user && isAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  // If user is logged in but not approved and not admin, show pending approval page
+  if (user && !isApproved && !isAdmin) {
     return <PendingApprovalPage />;
   }
 

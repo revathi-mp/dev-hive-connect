@@ -1,16 +1,13 @@
-
 import React from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Clock, Shield, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { useNavigate } from "react-router-dom";
 import { useAuthState } from "@/hooks/useAuthState";
 
 export function PendingApprovalPage() {
   const { user, signOut } = useAuth();
-  const { data: isAdmin } = useAdminCheck();
   const { updateApprovalStatus } = useAuthState();
   const navigate = useNavigate();
 
@@ -31,21 +28,11 @@ export function PendingApprovalPage() {
     if (isApproved) {
       // If user is now approved, redirect to home
       navigate("/home");
-    } else if (isAdmin) {
-      // If user is admin, redirect to admin panel
-      navigate("/admin");
     } else {
-      // If still not approved, just refresh the page to show updated status
-      window.location.reload();
+      // If still not approved, show a message
+      console.log('Still not approved, staying on pending page');
     }
   };
-
-  // If user is admin, redirect to admin panel
-  React.useEffect(() => {
-    if (isAdmin) {
-      navigate("/admin");
-    }
-  }, [isAdmin, navigate]);
 
   return (
     <MainLayout>

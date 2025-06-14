@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -74,10 +73,8 @@ export default function AdminLoginPage() {
           description: "Welcome to the admin panel!",
         });
         
-        // Small delay to ensure auth state and admin check are updated
-        setTimeout(() => {
-          navigate("/admin");
-        }, 500);
+        // Navigate to root and let Index.tsx handle the admin redirect
+        navigate("/");
       }
     } catch (error) {
       console.error("Unexpected admin login error:", error);
