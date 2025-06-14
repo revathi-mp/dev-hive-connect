@@ -25,6 +25,8 @@ import TermsPage from "./pages/TermsPage";
 import UserProfilePage from "./pages/UserProfilePage";
 import InterviewQuestionsPage from "./pages/InterviewQuestionsPage";
 import InterviewQuestionDetailPage from "./pages/InterviewQuestionDetailPage";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,8 @@ const App = () => (
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/user/:username" element={<UserProfilePage />} />
+              <Route path="/admin-login" element={<AdminLoginPage />} />
+              <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
