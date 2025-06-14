@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -103,14 +104,7 @@ export default function SignupPage() {
         let errorMessage = "Please check your information and try again.";
         
         if (error.message) {
-          if (error.name === 'EmailConfirmationRequired') {
-            errorMessage = error.message;
-            toast({
-              title: "Account Created - Awaiting Approval",
-              description: errorMessage,
-            });
-            return;
-          } else if (error.message.includes('User already registered')) {
+          if (error.message.includes('User already registered')) {
             // Handle existing user case
             setExistingEmail(data.email);
             setShowResendOption(true);
@@ -132,8 +126,8 @@ export default function SignupPage() {
         });
       } else {
         toast({
-          title: "Account Created - Awaiting Approval",
-          description: "Your account has been created. Please wait for admin approval before you can access the forum.",
+          title: "Account Created Successfully",
+          description: "Your account has been created. Please check your email for confirmation.",
         });
         navigate("/login");
       }
@@ -155,15 +149,6 @@ export default function SignupPage() {
       description="Enter your details to create a new account"
     >
       <div className="grid gap-6">
-        {/* Approval notice */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-medium text-blue-900 mb-2">Account Approval Required</h3>
-          <p className="text-sm text-blue-700">
-            New accounts require admin approval before you can access the forum. 
-            You'll be notified once your account is approved.
-          </p>
-        </div>
-
         {showResendOption && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h3 className="font-medium text-blue-900 mb-2">Account Already Exists</h3>
@@ -315,12 +300,6 @@ export default function SignupPage() {
             </Button>
           </form>
         </Form>
-        
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground mb-4">
-            After creating your account, please confirm your email and wait for admin approval.
-          </p>
-        </div>
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
