@@ -13,7 +13,9 @@ import { useAuth } from "@/contexts/AuthContext";
 const AdminPage = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { data: isAdmin, isLoading: adminLoading } = useAdminCheck();
+  const { data: isAdmin, isLoading: adminLoading, error: adminError } = useAdminCheck();
+
+  console.log('AdminPage - user:', user?.email, 'isAdmin:', isAdmin, 'authLoading:', authLoading, 'adminLoading:', adminLoading);
 
   // Show loading while checking authentication and admin status
   if (authLoading || adminLoading) {
@@ -31,6 +33,7 @@ const AdminPage = () => {
 
   // Show access denied if not authenticated or not admin
   if (!user || !isAdmin) {
+    console.log('Access denied - user:', !!user, 'isAdmin:', isAdmin, 'adminError:', adminError);
     return (
       <MainLayout>
         <div className="container max-w-6xl py-8 mx-auto">
@@ -46,8 +49,8 @@ const AdminPage = () => {
                 Go Home
               </Button>
               {!user && (
-                <Button variant="outline" onClick={() => navigate("/login")}>
-                  Sign In
+                <Button variant="outline" onClick={() => navigate("/admin/login")}>
+                  Admin Login
                 </Button>
               )}
             </div>
@@ -57,13 +60,18 @@ const AdminPage = () => {
     );
   }
 
+  console.log('Rendering admin dashboard for user:', user.email);
+
   return (
     <MainLayout>
       <div className="container max-w-7xl py-8 mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <Shield className="h-8 w-8 text-blue-600" />
-            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <div>
+              <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+              <p className="text-muted-foreground">Welcome, {user.email}</p>
+            </div>
           </div>
           <Button onClick={() => navigate("/")}>
             <ArrowLeft className="mr-2 h-4 w-4" />

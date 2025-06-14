@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,7 +27,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('Auth state changed:', event, session?.user?.email);
         
         if (session?.user) {
-          // Check if user is approved
+          // Check if user is admin first
+          const { data: adminRole, error: adminError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .eq('role', 'admin')
+            .single();
+
+          if (!adminError && adminRole) {
+            console.log('User is admin, allowing access');
+            setSession(session);
+            setUser(session.user);
+            setLoading(false);
+            return;
+          }
+
+          // If not admin, check if user is approved
           const { data: profile, error } = await supabase
             .from('profiles')
             .select('approved')
@@ -41,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(session.user);
           } else if (!profile?.approved) {
             console.log('User is not approved yet');
-            // Sign out unapproved users
+            // Sign out unapproved users (but not admins)
             await supabase.auth.signOut();
             setSession(null);
             setUser(null);
@@ -68,7 +83,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('Initial session:', session?.user?.email || 'No session');
           
           if (session?.user) {
-            // Check if user is approved
+            // Check if user is admin first
+            const { data: adminRole, error: adminError } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', session.user.id)
+              .eq('role', 'admin')
+              .single();
+
+            if (!adminError && adminRole) {
+              console.log('Initial session user is admin');
+              setSession(session);
+              setUser(session.user);
+              setLoading(false);
+              return;
+            }
+
+            // If not admin, check if user is approved
             const { data: profile, error: profileError } = await supabase
               .from('profiles')
               .select('approved')
