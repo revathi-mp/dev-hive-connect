@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { signIn, user, loading } = useAuth();
+  const { signIn, user, loading, isApproved } = useAuth();
   
   const form = useForm({
     defaultValues: {
@@ -23,13 +23,18 @@ export default function LoginPage() {
     },
   });
 
-  // Redirect if already logged in
+  // Redirect based on user status
   useEffect(() => {
     if (!loading && user) {
-      console.log('User already logged in, redirecting to home');
-      navigate("/home");
+      if (isApproved) {
+        console.log('User is approved, redirecting to home');
+        navigate("/home");
+      } else {
+        console.log('User is not approved, redirecting to index for pending approval');
+        navigate("/");
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, isApproved, navigate]);
 
   const onSubmit = async (data: { email: string; password: string }) => {
     if (!data.email || !data.password) {
@@ -42,7 +47,7 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
-    console.log('User login form submitted for:', data.email);
+    console.log('Community member login form submitted for:', data.email);
     
     try {
       const { error } = await signIn(data.email, data.password);
@@ -62,16 +67,11 @@ export default function LoginPage() {
           variant: "destructive",
         });
       } else {
-        console.log('Login successful, showing success toast');
+        console.log('Login successful, auth context will handle redirect');
         toast({
-          title: "Welcome Back!",
-          description: "Successfully logged into DevHive Connect!",
+          title: "Login Successful!",
+          description: "Welcome to DevHive Connect!",
         });
-        
-        // Small delay to ensure auth state is updated
-        setTimeout(() => {
-          navigate("/home");
-        }, 100);
       }
     } catch (error) {
       console.error("Unexpected login error:", error);
