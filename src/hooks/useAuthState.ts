@@ -50,8 +50,10 @@ export const useAuthState = () => {
           setIsApproved(false);
         }
         
-        // Always set loading to false after processing auth state
-        setLoading(false);
+        // ALWAYS set loading to false after processing auth state - this is crucial
+        if (mounted) {
+          setLoading(false);
+        }
       }
     );
 
@@ -73,27 +75,22 @@ export const useAuthState = () => {
         
         console.log('Initial session:', session?.user?.email || 'No session');
         
-        if (session?.user) {
-          setSession(session);
-          setUser(session.user);
-          try {
-            await updateApprovalStatus(session.user.id);
-          } catch (error) {
-            console.error('Error in initial approval check:', error);
-            setIsApproved(false);
-          }
-        } else {
+        // If we have a session, the auth state change listener will handle it
+        // If we don't have a session, set loading to false immediately
+        if (!session) {
           setSession(null);
           setUser(null);
           setIsApproved(false);
+          setLoading(false);
         }
+        // Note: If we have a session, don't set loading to false here
+        // because the auth state change listener will handle it
       } catch (error) {
         console.error('Error in getSession:', error);
-        setSession(null);
-        setUser(null);
-        setIsApproved(false);
-      } finally {
         if (mounted) {
+          setSession(null);
+          setUser(null);
+          setIsApproved(false);
           setLoading(false);
         }
       }
