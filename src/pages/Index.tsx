@@ -18,7 +18,8 @@ const Index = () => {
     adminError
   });
 
-  if (loading || adminLoading) {
+  // Show loading spinner while checking authentication or admin status
+  if (loading || (user && adminLoading)) {
     console.log('Showing loading state - loading:', loading, 'adminLoading:', adminLoading);
     return (
       <div className="min-h-screen flex items-center justify-center">
