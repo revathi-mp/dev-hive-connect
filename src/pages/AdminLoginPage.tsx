@@ -11,6 +11,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 
+// Designated admin email - only this email can access admin panel
+const ADMIN_EMAIL = "admin@devhive.com";
+
 export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -47,8 +50,18 @@ export default function AdminLoginPage() {
       return;
     }
 
+    // Check if the email is the designated admin email
+    if (data.email !== ADMIN_EMAIL) {
+      toast({
+        title: "Access Denied",
+        description: "Only authorized administrators can access this panel.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
-    console.log('Admin login form submitted for:', data.email);
+    console.log('Admin login attempt for:', data.email);
     
     try {
       const { error } = await signIn(data.email, data.password);
@@ -56,7 +69,7 @@ export default function AdminLoginPage() {
       if (error) {
         console.error("Admin login error:", error);
         
-        let errorMessage = "Admin login failed. Please check your credentials.";
+        let errorMessage = "Invalid admin credentials. Please check your email and password.";
         
         if (error.message) {
           errorMessage = error.message;
@@ -116,6 +129,14 @@ export default function AdminLoginPage() {
           </span>
         </div>
 
+        <div className="p-4 bg-amber-50 dark:bg-amber-950 rounded-lg border border-amber-200 dark:border-amber-800">
+          <p className="text-sm text-amber-700 dark:text-amber-300">
+            <strong>Admin Credentials:</strong><br />
+            Email: admin@devhive.com<br />
+            Password: admin123
+          </p>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <FormField
@@ -134,7 +155,7 @@ export default function AdminLoginPage() {
                   <FormControl>
                     <Input 
                       id="admin-email" 
-                      placeholder="admin@company.com" 
+                      placeholder="admin@devhive.com" 
                       type="email" 
                       autoComplete="email"
                       disabled={isLoading}
