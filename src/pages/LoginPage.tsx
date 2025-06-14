@@ -213,6 +213,15 @@ export default function LoginPage() {
               Sign up for forum
             </Link>
           </div>
+          <div className="mt-3 pt-3 border-t">
+            <Link
+              to="/admin/login"
+              className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 underline-offset-4 hover:underline"
+            >
+              <Shield className="h-4 w-4" />
+              Admin Login
+            </Link>
+          </div>
         </div>
       </div>
     </AuthLayout>

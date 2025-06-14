@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import { Shield, Eye, EyeOff } from "lucide-react";
+import { Shield, Eye, EyeOff, Users } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -218,13 +218,16 @@ export default function AdminLoginPage() {
           </p>
         </div>
 
-        <div className="text-center text-sm border-t pt-4">
-          <Link
-            to="/login"
-            className="font-medium text-primary underline-offset-4 hover:underline"
-          >
-            ← Back to User Login
-          </Link>
+        <div className="text-center text-sm border-t pt-4 space-y-2">
+          <div>
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-1 font-medium text-primary hover:text-primary/80 underline-offset-4 hover:underline"
+            >
+              <Users className="h-4 w-4" />
+              ← Back to User Login
+            </Link>
+          </div>
         </div>
       </div>
     </AuthLayout>
