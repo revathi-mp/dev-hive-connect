@@ -71,6 +71,31 @@ export default function HomePage() {
     setViewAllPosts(false);
   };
 
+  // Show admin login panel when not logged in
+  if (!user) {
+    return (
+      <MainLayout>
+        <div className="container py-6">
+          <div className="mb-8 flex flex-col items-center justify-center gap-4">
+            <div className="flex items-center gap-4">
+              <Logo size="lg" className="text-primary" />
+              <div className="text-center">
+                <h1 className="text-3xl font-bold tracking-tight">DevHive Connect</h1>
+                <p className="mt-1 text-lg text-muted-foreground">
+                  Where developers collaborate, share knowledge, and grow together
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-center">
+            <HomeAdminLoginPanel />
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
       <div className="container py-6">
@@ -85,52 +110,37 @@ export default function HomePage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {user && (
-              <Button className="md:w-auto" size="lg" onClick={() => setModalOpen(true)}>
-                <Plus className="mr-1 h-4 w-4" />
-                New Post
-              </Button>
-            )}
+            <Button className="md:w-auto" size="lg" onClick={() => setModalOpen(true)}>
+              <Plus className="mr-1 h-4 w-4" />
+              New Post
+            </Button>
           </div>
         </div>
 
-        {/* Show admin login panel when not logged in */}
-        {!user && (
-          <div className="mb-8 flex justify-center">
-            <HomeAdminLoginPanel />
-          </div>
-        )}
-
-        {user && (
-          <div className="mb-8 flex w-full max-w-md items-center relative">
-            <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              className="pl-9"
-              placeholder="Search discussions..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-          </div>
-        )}
+        <div className="mb-8 flex w-full max-w-md items-center relative">
+          <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            className="pl-9"
+            placeholder="Search discussions..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+        </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <section className="mb-10">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Latest Discussions</h2>
-                {user && (
-                  <>
-                    {viewAllPosts ? (
-                      <Button variant="outline" size="sm" onClick={handleViewLessPosts}>
-                        View Less
-                      </Button>
-                    ) : (
-                      <Button variant="outline" size="sm" onClick={handleViewAllPosts}>
-                        View All
-                      </Button>
-                    )}
-                  </>
+                {viewAllPosts ? (
+                  <Button variant="outline" size="sm" onClick={handleViewLessPosts}>
+                    View Less
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" onClick={handleViewAllPosts}>
+                    View All
+                  </Button>
                 )}
               </div>
               <div className="space-y-4">
@@ -140,10 +150,10 @@ export default function HomePage() {
                   ))
                 ) : (
                   <div className="p-8 text-center text-muted-foreground border rounded-md">
-                    {user ? "No discussions found." : "Login to view and participate in discussions."}
+                    No discussions found.
                   </div>
                 )}
-                {user && !viewAllPosts && filteredPosts.length > 3 && (
+                {!viewAllPosts && filteredPosts.length > 3 && (
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -187,7 +197,7 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-      {user && <NewPostModal open={modalOpen} onOpenChange={setModalOpen} onSubmit={handleNewPost} />}
+      <NewPostModal open={modalOpen} onOpenChange={setModalOpen} onSubmit={handleNewPost} />
     </MainLayout>
   );
 }

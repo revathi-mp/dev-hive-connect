@@ -183,6 +183,15 @@ export function HomeAdminLoginPanel() {
             </Button>
           </form>
         </Form>
+        
+        <div className="mt-6 text-center border-t pt-4">
+          <p className="text-sm text-muted-foreground mb-3">
+            Are you a forum user?
+          </p>
+          <Button variant="outline" className="w-full" onClick={() => navigate("/login")}>
+            Go to User Login
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
